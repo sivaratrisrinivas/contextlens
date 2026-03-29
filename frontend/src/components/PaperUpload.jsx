@@ -1,13 +1,13 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Upload, FileText, Clipboard, ArrowRight, X } from 'lucide-react';
+import { Upload, FileText, X, ArrowRight, Type } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-export const PaperUpload = ({ onPaperCreated }) => {
+export const PaperUpload = ({ onPaperCreated, onClose }) => {
   const [title, setTitle] = useState('');
   const [textContent, setTextContent] = useState('');
   const [file, setFile] = useState(null);
@@ -17,12 +17,11 @@ export const PaperUpload = ({ onPaperCreated }) => {
 
   const handleSubmitText = async () => {
     if (!title.trim()) {
-      toast.error('Please enter a paper title first');
-      document.querySelector('[data-testid="paper-title-input"]')?.focus();
+      toast.error('Enter a title');
       return;
     }
     if (!textContent.trim()) {
-      toast.error('Please paste some paper content');
+      toast.error('Paste some content');
       return;
     }
     setIsUploading(true);
@@ -31,11 +30,8 @@ export const PaperUpload = ({ onPaperCreated }) => {
       formData.append('title', title.trim());
       formData.append('content', textContent.trim());
       const res = await axios.post(`${API}/papers`, formData);
-      toast.success('Paper added');
       onPaperCreated(res.data);
-      setTitle('');
-      setTextContent('');
-    } catch (err) {
+    } catch {
       toast.error('Failed to create paper');
     } finally {
       setIsUploading(false);
@@ -44,12 +40,11 @@ export const PaperUpload = ({ onPaperCreated }) => {
 
   const handleSubmitPDF = async () => {
     if (!title.trim()) {
-      toast.error('Please enter a paper title first');
-      document.querySelector('[data-testid="paper-title-input"]')?.focus();
+      toast.error('Enter a title');
       return;
     }
     if (!file) {
-      toast.error('Please select a PDF file');
+      toast.error('Select a PDF');
       return;
     }
     setIsUploading(true);
@@ -58,12 +53,9 @@ export const PaperUpload = ({ onPaperCreated }) => {
       formData.append('title', title.trim());
       formData.append('file', file);
       const res = await axios.post(`${API}/papers`, formData);
-      toast.success('Paper uploaded');
       onPaperCreated(res.data);
-      setTitle('');
-      setFile(null);
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Failed to upload PDF');
+      toast.error(err.response?.data?.detail || 'Upload failed');
     } finally {
       setIsUploading(false);
     }
@@ -72,97 +64,98 @@ export const PaperUpload = ({ onPaperCreated }) => {
   const handleDrop = (e) => {
     e.preventDefault();
     setDragOver(false);
-    const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile && droppedFile.type === 'application/pdf') {
-      setFile(droppedFile);
+    const f = e.dataTransfer.files[0];
+    if (f?.type === 'application/pdf') {
+      setFile(f);
     } else {
-      toast.error('Only PDF files are accepted');
+      toast.error('PDF only');
     }
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="glass-panel p-8"
+    <div
+      className="bg-white rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.08)] p-7 sm:p-8"
       data-testid="paper-upload"
     >
-      {/* Title input */}
-      <div className="mb-6">
-        <label className="block text-sm uppercase tracking-[0.15em] text-gray-500 mb-3 font-medium">
-          Paper Title <span className="text-cyan-400">*</span>
-        </label>
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="e.g. Attention Is All You Need"
-          className={`w-full bg-white/[0.03] border rounded-2xl px-5 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/20 transition-all text-[15px] ${
-            !title.trim() ? 'border-white/10' : 'border-cyan-500/30'
-          }`}
-          data-testid="paper-title-input"
-        />
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="font-['Manrope'] text-lg font-semibold text-[#1D1D1F] tracking-tight">
+          New Paper
+        </h2>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full hover:bg-black/[0.04] transition-colors"
+            data-testid="close-upload-btn"
+          >
+            <X className="w-4 h-4 text-[#86868B]" strokeWidth={1.5} />
+          </button>
+        )}
       </div>
 
+      <input
+        type="text"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Title"
+        className="w-full bg-transparent border-b border-black/[0.08] pb-3 text-[#1D1D1F] text-lg font-['Newsreader'] placeholder-[#C7C7CC] focus:outline-none focus:border-black/20 transition-colors mb-6"
+        data-testid="paper-title-input"
+      />
+
       <Tabs defaultValue="paste" className="w-full">
-        <TabsList className="bg-white/5 border border-white/10 rounded-xl p-1 w-full">
+        <TabsList className="bg-[#F5F5F7] rounded-xl p-1 w-full h-10 border-0">
           <TabsTrigger
             value="paste"
-            className="flex-1 rounded-lg data-[state=active]:bg-white/10 data-[state=active]:text-white text-gray-400 transition-all text-sm"
+            className="flex-1 rounded-lg text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-[#1D1D1F] data-[state=active]:shadow-sm text-[#86868B] transition-all gap-1.5"
             data-testid="paste-tab"
           >
-            <Clipboard className="w-4 h-4 mr-2" />
-            Paste Text
+            <Type className="w-3.5 h-3.5" strokeWidth={1.5} />
+            Text
           </TabsTrigger>
           <TabsTrigger
             value="upload"
-            className="flex-1 rounded-lg data-[state=active]:bg-white/10 data-[state=active]:text-white text-gray-400 transition-all text-sm"
+            className="flex-1 rounded-lg text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-[#1D1D1F] data-[state=active]:shadow-sm text-[#86868B] transition-all gap-1.5"
             data-testid="upload-tab"
           >
-            <Upload className="w-4 h-4 mr-2" />
-            Upload PDF
+            <Upload className="w-3.5 h-3.5" strokeWidth={1.5} />
+            PDF
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="paste" className="mt-6">
+        <TabsContent value="paste" className="mt-5">
           <textarea
             value={textContent}
             onChange={(e) => setTextContent(e.target.value)}
-            placeholder="Paste your paper text here..."
-            rows={8}
-            className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/20 transition-all resize-none text-[15px] leading-relaxed"
+            placeholder="Paste paper text..."
+            rows={6}
+            className="w-full bg-[#F5F5F7] rounded-2xl px-5 py-4 text-[#1D1D1F] text-[15px] font-['Newsreader'] placeholder-[#C7C7CC] focus:outline-none resize-none leading-relaxed"
             data-testid="paper-text-input"
           />
           <button
             onClick={handleSubmitText}
             disabled={isUploading}
-            className="mt-4 w-full flex items-center justify-center gap-3 bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/25 hover:shadow-[0_0_24px_rgba(34,211,238,0.2)] disabled:opacity-30 disabled:cursor-not-allowed rounded-full px-8 py-3.5 transition-all text-sm font-medium"
+            className="mt-4 w-full flex items-center justify-center gap-2 bg-[#1D1D1F] text-white rounded-full py-3 text-sm font-medium hover:bg-[#333] disabled:opacity-30 transition-all"
             data-testid="submit-text-btn"
           >
             {isUploading ? (
-              <div className="w-4 h-4 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
-              <>
-                <span>Start Reading</span>
-                <ArrowRight className="w-4 h-4" />
-              </>
+              <>Read<ArrowRight className="w-4 h-4" strokeWidth={1.5} /></>
             )}
           </button>
         </TabsContent>
 
-        <TabsContent value="upload" className="mt-6">
+        <TabsContent value="upload" className="mt-5">
           <div
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all ${
+            className={`rounded-2xl p-8 text-center cursor-pointer transition-all border border-dashed ${
               dragOver
-                ? 'border-cyan-500/50 bg-cyan-500/5'
+                ? 'border-[#1D1D1F]/20 bg-[#F5F5F7]'
                 : file
-                ? 'border-lime-500/30 bg-lime-500/5'
-                : 'border-white/10 hover:border-white/20 hover:bg-white/[0.02]'
+                ? 'border-[#1D1D1F]/10 bg-[#F5F5F7]'
+                : 'border-black/[0.08] hover:border-black/15 hover:bg-[#FAFAFA]'
             }`}
             data-testid="pdf-dropzone"
           >
@@ -176,45 +169,37 @@ export const PaperUpload = ({ onPaperCreated }) => {
             />
             {file ? (
               <div className="flex items-center justify-center gap-3">
-                <FileText className="w-6 h-6 text-lime-400" />
-                <span className="text-lime-300 text-sm">{file.name}</span>
+                <FileText className="w-5 h-5 text-[#1D1D1F]" strokeWidth={1.5} />
+                <span className="text-[#1D1D1F] text-sm truncate max-w-[200px]">{file.name}</span>
                 <button
                   onClick={(e) => { e.stopPropagation(); setFile(null); }}
-                  className="p-1 rounded-full hover:bg-white/10"
+                  className="p-1 rounded-full hover:bg-black/[0.04]"
                   data-testid="remove-file-btn"
                 >
-                  <X className="w-4 h-4 text-gray-400" />
+                  <X className="w-3.5 h-3.5 text-[#86868B]" />
                 </button>
               </div>
             ) : (
               <>
-                <Upload className="w-8 h-8 text-gray-500 mx-auto mb-3" />
-                <p className="text-gray-400 text-sm">
-                  Drop a PDF here or click to browse
-                </p>
-                <p className="text-gray-600 text-xs mt-1">
-                  PDF files only
-                </p>
+                <Upload className="w-6 h-6 text-[#C7C7CC] mx-auto mb-2" strokeWidth={1.5} />
+                <p className="text-[#86868B] text-xs">Drop PDF or browse</p>
               </>
             )}
           </div>
           <button
             onClick={handleSubmitPDF}
             disabled={isUploading}
-            className="mt-4 w-full flex items-center justify-center gap-3 bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/25 hover:shadow-[0_0_24px_rgba(34,211,238,0.2)] disabled:opacity-30 disabled:cursor-not-allowed rounded-full px-8 py-3.5 transition-all text-sm font-medium"
+            className="mt-4 w-full flex items-center justify-center gap-2 bg-[#1D1D1F] text-white rounded-full py-3 text-sm font-medium hover:bg-[#333] disabled:opacity-30 transition-all"
             data-testid="submit-pdf-btn"
           >
             {isUploading ? (
-              <div className="w-4 h-4 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
-              <>
-                <span>Upload & Read</span>
-                <ArrowRight className="w-4 h-4" />
-              </>
+              <>Read<ArrowRight className="w-4 h-4" strokeWidth={1.5} /></>
             )}
           </button>
         </TabsContent>
       </Tabs>
-    </motion.div>
+    </div>
   );
 };

@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bookmark, Trash2, ChevronLeft, Search, FileText } from 'lucide-react';
+import { ArrowLeft, Search, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import axios from 'axios';
+import { Logo } from '@/components/Logo';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+const ease = [0.16, 1, 0.3, 1];
 
 export const BookmarksList = ({ onBack }) => {
   const [bookmarks, setBookmarks] = useState([]);
@@ -15,150 +16,119 @@ export const BookmarksList = ({ onBack }) => {
   const [expandedId, setExpandedId] = useState(null);
 
   useEffect(() => {
-    fetchBookmarks();
+    (async () => {
+      try {
+        const res = await axios.get(`${API}/bookmarks`);
+        setBookmarks(res.data);
+      } catch { toast.error('Failed to load'); }
+      finally { setLoading(false); }
+    })();
   }, []);
-
-  const fetchBookmarks = async () => {
-    try {
-      const res = await axios.get(`${API}/bookmarks`);
-      setBookmarks(res.data);
-    } catch (err) {
-      toast.error('Failed to load bookmarks');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const deleteBookmark = async (id) => {
     try {
       await axios.delete(`${API}/bookmarks/${id}`);
       setBookmarks(prev => prev.filter(b => b.id !== id));
-      toast.success('Bookmark removed');
-    } catch (err) {
-      toast.error('Failed to remove');
-    }
+    } catch { toast.error('Failed'); }
   };
 
   const filtered = bookmarks.filter(b =>
     b.word.toLowerCase().includes(search.toLowerCase()) ||
-    b.explanation.toLowerCase().includes(search.toLowerCase()) ||
-    b.paper_title.toLowerCase().includes(search.toLowerCase())
+    b.explanation.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <div className="min-h-screen" data-testid="bookmarks-page">
+    <div className="min-h-screen bg-[#F5F5F7]" data-testid="bookmarks-page">
       {/* Header */}
-      <div className="sticky top-0 z-40 border-b border-white/5" style={{ background: 'rgba(5,5,5,0.8)', backdropFilter: 'blur(20px)' }}>
-        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center gap-4">
-          <button
-            onClick={onBack}
-            className="p-2 rounded-full hover:bg-white/10 transition-colors"
-            data-testid="bookmarks-back-btn"
-          >
-            <ChevronLeft className="w-5 h-5 text-gray-400" />
+      <div className="fixed top-0 left-0 right-0 h-14 z-40 backdrop-blur-2xl bg-white/70 border-b border-black/[0.04] flex items-center justify-between px-6 sm:px-10">
+        <div className="flex items-center gap-3">
+          <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-black/[0.04] transition-colors" data-testid="bookmarks-back-btn">
+            <ArrowLeft className="w-[18px] h-[18px] text-[#1D1D1F]" strokeWidth={1.5} />
           </button>
-          <div className="flex items-center gap-3 flex-1">
-            <Bookmark className="w-5 h-5 text-lime-400" />
-            <h1 className="font-outfit text-lg font-semibold text-white">
-              Saved Explanations
-            </h1>
-          </div>
-          <Badge className="bg-white/5 text-gray-400 border-white/10 text-xs">
-            {bookmarks.length}
-          </Badge>
+          <span className="font-['Manrope'] text-sm font-semibold text-[#1D1D1F]">Saved</span>
         </div>
+        <span className="text-[10px] text-[#C7C7CC] tabular-nums">{bookmarks.length}</span>
       </div>
 
-      <div className="max-w-3xl mx-auto px-6 py-8">
+      <div className="max-w-2xl mx-auto px-6 sm:px-10 pt-20 pb-20">
         {/* Search */}
         <div className="relative mb-8">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#C7C7CC]" strokeWidth={1.5} />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search saved words..."
-            className="w-full bg-white/[0.03] border border-white/10 rounded-2xl pl-11 pr-5 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500/30 transition-all text-sm"
+            placeholder="Search..."
+            className="w-full bg-white rounded-xl pl-10 pr-4 py-2.5 text-[#1D1D1F] text-sm placeholder-[#C7C7CC] focus:outline-none shadow-sm border border-black/[0.04]"
             data-testid="bookmark-search"
           />
         </div>
 
         {loading ? (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {[1, 2, 3].map(i => (
-              <div key={i} className="glass-panel p-6 space-y-3">
-                <div className="h-6 w-24 bg-white/5 rounded-lg pulse-glow" />
-                <div className="h-3 w-full bg-white/5 rounded pulse-glow" />
-                <div className="h-3 w-3/4 bg-white/5 rounded pulse-glow" />
+              <div key={i} className="py-5 border-b border-black/[0.04]">
+                <div className="h-5 w-24 bg-black/[0.04] rounded-lg pulse-soft" />
+                <div className="h-3 w-full bg-black/[0.04] rounded mt-3 pulse-soft" />
               </div>
             ))}
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20" data-testid="empty-bookmarks">
-            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
-              <Bookmark className="w-7 h-7 text-gray-600" />
-            </div>
-            <p className="text-gray-500 text-sm">
-              {search ? 'No matches found' : 'No saved explanations yet'}
-            </p>
-            <p className="text-gray-600 text-xs mt-1">
-              {search ? 'Try a different search' : 'Click the save button when reading a paper'}
+            <p className="text-[#C7C7CC] text-sm">
+              {search ? 'No matches' : 'No saved words yet'}
             </p>
           </div>
         ) : (
-          <div className="space-y-3" data-testid="bookmarks-list">
+          <div data-testid="bookmarks-list">
             <AnimatePresence>
-              {filtered.map((bookmark, i) => (
+              {filtered.map((bm, i) => (
                 <motion.div
-                  key={bookmark.id}
-                  initial={{ opacity: 0, y: 10 }}
+                  key={bm.id}
+                  initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ delay: i * 0.03, duration: 0.3 }}
-                  className="glass-panel overflow-hidden"
-                  data-testid={`bookmark-item-${bookmark.id}`}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ delay: i * 0.03, duration: 0.3, ease }}
+                  className="group py-5 border-b border-black/[0.04] last:border-0"
+                  data-testid={`bookmark-item-${bm.id}`}
                 >
                   <div
-                    className="p-5 cursor-pointer hover:bg-white/[0.02] transition-all"
-                    onClick={() => setExpandedId(expandedId === bookmark.id ? null : bookmark.id)}
+                    className="flex items-start justify-between gap-4 cursor-pointer"
+                    onClick={() => setExpandedId(expandedId === bm.id ? null : bm.id)}
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="font-outfit text-xl font-bold text-cyan-300">
-                            {bookmark.word}
-                          </h3>
-                          <div className="flex items-center gap-1.5 text-gray-600">
-                            <FileText className="w-3 h-3" />
-                            <span className="text-xs truncate max-w-[200px]">{bookmark.paper_title}</span>
-                          </div>
-                        </div>
-                        <p className={`text-gray-300 text-sm leading-relaxed ${
-                          expandedId === bookmark.id ? '' : 'line-clamp-2'
-                        }`}>
-                          {bookmark.explanation}
-                        </p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-baseline gap-3">
+                        <h3 className="font-['Manrope'] text-lg font-medium text-[#1D1D1F] tracking-tight">
+                          {bm.word}
+                        </h3>
+                        <span className="text-[10px] text-[#C7C7CC] truncate max-w-[150px]">{bm.paper_title}</span>
                       </div>
+                      <p className={`text-[#86868B] text-sm font-['Newsreader'] leading-relaxed mt-1 ${
+                        expandedId === bm.id ? '' : 'line-clamp-2'
+                      }`}>
+                        {bm.explanation}
+                      </p>
+                      {expandedId === bm.id && bm.context && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          className="mt-3 bg-[#F5F5F7] rounded-xl p-3"
+                        >
+                          <p className="text-[#86868B] text-xs font-['Newsreader'] italic">
+                            ...{bm.context.substring(0, 150)}...
+                          </p>
+                        </motion.div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0 pt-1">
                       <button
-                        onClick={(e) => { e.stopPropagation(); deleteBookmark(bookmark.id); }}
-                        className="p-2 rounded-xl hover:bg-red-500/10 transition-all shrink-0"
-                        data-testid={`delete-bookmark-${bookmark.id}`}
+                        onClick={(e) => { e.stopPropagation(); deleteBookmark(bm.id); }}
+                        className="p-1.5 rounded-full opacity-0 group-hover:opacity-100 hover:bg-black/[0.04] transition-all"
+                        data-testid={`delete-bookmark-${bm.id}`}
                       >
-                        <Trash2 className="w-4 h-4 text-red-400" />
+                        <Trash2 className="w-3.5 h-3.5 text-[#C7C7CC]" strokeWidth={1.5} />
                       </button>
                     </div>
-                    {expandedId === bookmark.id && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        className="mt-4 bg-white/[0.02] rounded-xl p-4 border border-white/5"
-                      >
-                        <p className="text-xs uppercase tracking-[0.15em] text-gray-500 mb-2">Context</p>
-                        <p className="text-gray-400 text-sm italic leading-relaxed">
-                          "...{bookmark.context}..."
-                        </p>
-                      </motion.div>
-                    )}
                   </div>
                 </motion.div>
               ))}
