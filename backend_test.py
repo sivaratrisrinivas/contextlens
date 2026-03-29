@@ -246,6 +246,27 @@ class PaperReadingAPITester:
         
         return success
 
+    def test_paper_cache_batch(self):
+        """Test batch cache endpoint for a paper"""
+        if not self.created_paper_id:
+            print("❌ Skipped - No paper ID available")
+            return False
+            
+        success, response = self.run_test(
+            "Get Paper Cache (Batch)",
+            "GET",
+            f"lookup/paper-cache/{self.created_paper_id}",
+            200
+        )
+        
+        if success and isinstance(response, list):
+            print(f"   Found {len(response)} cached entries for paper")
+            if len(response) > 0:
+                print(f"   First cached word: {response[0].get('word', 'No word')}")
+                print(f"   All entries marked as cached: {all(entry.get('cached', False) for entry in response)}")
+        
+        return success
+
     def test_delete_paper(self):
         """Test deleting a paper"""
         if not self.created_paper_id:
@@ -275,6 +296,7 @@ def main():
         tester.test_get_paper,
         tester.test_word_lookup,
         tester.test_word_lookup_cache,
+        tester.test_paper_cache_batch,
         tester.test_create_bookmark,
         tester.test_list_bookmarks,
         tester.test_delete_bookmark,

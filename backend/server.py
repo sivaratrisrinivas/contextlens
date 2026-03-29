@@ -13,6 +13,7 @@ from typing import List, Optional
 from datetime import datetime, timezone
 
 import pdfplumber
+from pdf_parser import extract_body_matter
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 ROOT_DIR = Path(__file__).parent
@@ -115,7 +116,8 @@ async def create_paper(title: str = Form(...), content: str = Form(None), file: 
                     text = page.extract_text()
                     if text:
                         pages.append(text)
-                paper_content = "\n\n".join(pages)
+                # Smart body matter extraction: strips front/back matter from books
+                paper_content = extract_body_matter(pages)
             if not paper_content.strip():
                 raise HTTPException(400, "Could not extract text from this PDF. The PDF may be image-based or empty.")
         except HTTPException:
@@ -196,6 +198,16 @@ async def check_cache(fingerprint: str):
     cached["cached"] = True
     return cached
 
+@api_router.get("/lookup/paper-cache/{paper_id}")
+async def get_paper_cache(paper_id: str):
+    """Batch fetch all cached lookups for a paper. O(k) where k = cached entries."""
+    entries = await db.word_cache.find(
+        {"paper_id": paper_id}, {"_id": 0}
+    ).to_list(5000)
+    for e in entries:
+        e["cached"] = True
+    return entries
+
 # --- Bookmark Routes ---
 @api_router.post("/bookmarks")
 async def create_bookmark(req: BookmarkCreate):
@@ -252,7 +264,9 @@ logger = logging.getLogger(__name__)
 @app.on_event("startup")
 async def startup():
     # Create indexes
+    # Create indexes for O(log n) → effective O(1) cache lookups
     await db.word_cache.create_index("fingerprint", unique=True)
+    await db.word_cache.create_index("paper_id")  # For batch cache fetch
     await db.papers.create_index("id", unique=True)
     await db.bookmarks.create_index("id", unique=True)
     logger.info("Database indexes created")
