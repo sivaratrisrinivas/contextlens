@@ -16,8 +16,13 @@ export const PaperUpload = ({ onPaperCreated }) => {
   const fileInputRef = useRef(null);
 
   const handleSubmitText = async () => {
-    if (!title.trim() || !textContent.trim()) {
-      toast.error('Please provide a title and content');
+    if (!title.trim()) {
+      toast.error('Please enter a paper title first');
+      document.querySelector('[data-testid="paper-title-input"]')?.focus();
+      return;
+    }
+    if (!textContent.trim()) {
+      toast.error('Please paste some paper content');
       return;
     }
     setIsUploading(true);
@@ -38,8 +43,13 @@ export const PaperUpload = ({ onPaperCreated }) => {
   };
 
   const handleSubmitPDF = async () => {
-    if (!title.trim() || !file) {
-      toast.error('Please provide a title and select a PDF');
+    if (!title.trim()) {
+      toast.error('Please enter a paper title first');
+      document.querySelector('[data-testid="paper-title-input"]')?.focus();
+      return;
+    }
+    if (!file) {
+      toast.error('Please select a PDF file');
       return;
     }
     setIsUploading(true);
@@ -81,14 +91,16 @@ export const PaperUpload = ({ onPaperCreated }) => {
       {/* Title input */}
       <div className="mb-6">
         <label className="block text-sm uppercase tracking-[0.15em] text-gray-500 mb-3 font-medium">
-          Paper Title
+          Paper Title <span className="text-cyan-400">*</span>
         </label>
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="e.g. Attention Is All You Need"
-          className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/20 transition-all text-[15px]"
+          className={`w-full bg-white/[0.03] border rounded-2xl px-5 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/20 transition-all text-[15px] ${
+            !title.trim() ? 'border-white/10' : 'border-cyan-500/30'
+          }`}
           data-testid="paper-title-input"
         />
       </div>
@@ -124,7 +136,7 @@ export const PaperUpload = ({ onPaperCreated }) => {
           />
           <button
             onClick={handleSubmitText}
-            disabled={isUploading || !title.trim() || !textContent.trim()}
+            disabled={isUploading}
             className="mt-4 w-full flex items-center justify-center gap-3 bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/25 hover:shadow-[0_0_24px_rgba(34,211,238,0.2)] disabled:opacity-30 disabled:cursor-not-allowed rounded-full px-8 py-3.5 transition-all text-sm font-medium"
             data-testid="submit-text-btn"
           >
@@ -188,7 +200,7 @@ export const PaperUpload = ({ onPaperCreated }) => {
           </div>
           <button
             onClick={handleSubmitPDF}
-            disabled={isUploading || !title.trim() || !file}
+            disabled={isUploading}
             className="mt-4 w-full flex items-center justify-center gap-3 bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/25 hover:shadow-[0_0_24px_rgba(34,211,238,0.2)] disabled:opacity-30 disabled:cursor-not-allowed rounded-full px-8 py-3.5 transition-all text-sm font-medium"
             data-testid="submit-pdf-btn"
           >

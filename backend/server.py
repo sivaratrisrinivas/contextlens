@@ -106,6 +106,8 @@ async def create_paper(title: str = Form(...), content: str = Form(None), file: 
         if not file.filename.lower().endswith('.pdf'):
             raise HTTPException(400, "Only PDF files are supported")
         data = await file.read()
+        if len(data) > 50 * 1024 * 1024:  # 50MB limit
+            raise HTTPException(400, "PDF file too large (max 50MB)")
         try:
             with pdfplumber.open(io.BytesIO(data)) as pdf:
                 pages = []
@@ -114,7 +116,12 @@ async def create_paper(title: str = Form(...), content: str = Form(None), file: 
                     if text:
                         pages.append(text)
                 paper_content = "\n\n".join(pages)
+            if not paper_content.strip():
+                raise HTTPException(400, "Could not extract text from this PDF. The PDF may be image-based or empty.")
+        except HTTPException:
+            raise
         except Exception as e:
+            logger.error(f"PDF parse error: {e}")
             raise HTTPException(400, f"Failed to parse PDF: {str(e)}")
 
     if not paper_content.strip():
