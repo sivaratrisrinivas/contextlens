@@ -26,8 +26,9 @@ function makeFingerprint(word, context) {
  * Returns: [ { paragraphIndex, tokens: [{text, space, globalIndex, clean, fingerprint, context}] } ]
  */
 function tokenizeParagraphs(text) {
-  // Split by double newlines (paragraph breaks) or single newlines followed by blank lines
-  const rawParagraphs = text.split(/\n{2,}/);
+  // Normalize line endings (CRLF → LF) then split by double newlines
+  const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const rawParagraphs = normalized.split(/\n\s*\n/);
   const paragraphs = [];
   let globalIdx = 0;
 
@@ -284,10 +285,16 @@ export const PaperReader = ({ paper, onBack }) => {
       setActiveLookup(res.data);
     } catch {
       toast.error('Failed to get explanation');
+      setIsLoading(false);
     } finally {
       setIsLoading(false);
     }
   }, [paper]);
+
+  const handleClosePanel = useCallback(() => {
+    setActiveLookup(null);
+    setIsLoading(false);
+  }, []);
 
   const handleBookmark = useCallback(async () => {
     if (!activeLookup) return;
@@ -367,7 +374,7 @@ export const PaperReader = ({ paper, onBack }) => {
       {/* Side panel */}
       <ExplanationPanel
         lookup={activeLookup}
-        onClose={() => { setActiveLookup(null); setIsLoading(false); }}
+        onClose={handleClosePanel}
         onBookmark={handleBookmark}
         isBookmarked={isCurrentBookmarked}
         isLoading={isLoading}
