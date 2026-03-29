@@ -47,3 +47,19 @@ Build a paper reading web app with AI-powered contextual word lookup. Every word
 - Paper collections/folders
 - Export bookmarks as study notes
 - Highlight and annotate passages
+
+## Iteration 2 (2026-03-29)
+### Smart PDF Body Matter Extraction
+- New `pdf_parser.py` module with heuristic-based page scoring
+- Detects/strips front matter: copyright, ISBN, TOC, preface, dedication, foreword
+- Detects/strips back matter: index, bibliography, appendix, glossary, about author
+- Fallback: returns full content if body < 30% of pages (safety check)
+- Time: O(P) single linear scan where P = pages
+
+### Optimized Caching System
+- Pre-computed fingerprints at tokenization time (O(N) one-time, then O(1) per click)
+- Map-based local cache with O(1) amortized lookups
+- Batch prefetch endpoint: GET /api/lookup/paper-cache/{paper_id}
+- On paper load: fetches all cached lookups in one call → instant for returning readers
+- "Instant" badge on cached results, cache count in header
+- MongoDB compound index on paper_id for fast batch queries
