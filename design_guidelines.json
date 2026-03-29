@@ -1,0 +1,97 @@
+{
+  "theme": "dark",
+  "archetype": "7 - Electric & Neon (Acid Glassmorphism / Spatial Computing)",
+  "colors": {
+    "background": {
+      "base": "#050505",
+      "surface": "#0a0a0a",
+      "glass": "rgba(255, 255, 255, 0.03)"
+    },
+    "text": {
+      "primary": "#FFFFFF",
+      "secondary": "#A3A3A3",
+      "accent": "#22d3ee"
+    },
+    "accents": {
+      "cyan": "#22d3ee",
+      "acid_green": "#a3e635",
+      "fuchsia": "#d946ef"
+    }
+  },
+  "typography": {
+    "fonts": {
+      "headings": "Outfit",
+      "body": "Manrope",
+      "mono": "JetBrains Mono"
+    },
+    "hierarchy": {
+      "h1": "text-5xl sm:text-6xl lg:text-7xl tracking-tighter font-black",
+      "h2": "text-3xl sm:text-4xl lg:text-5xl tracking-tight font-bold",
+      "h3": "text-xl sm:text-2xl font-semibold",
+      "body": "text-lg sm:text-xl leading-relaxed tracking-wide text-gray-200",
+      "small": "text-sm uppercase tracking-[0.2em] text-gray-400"
+    }
+  },
+  "spacing_and_layout": {
+    "philosophy": "Generous Spacing, Spatial Computing Canvas, Infinity Canvas",
+    "reading_area": "max-w-4xl mx-auto p-8 sm:p-16 lg:p-24",
+    "grid": "grid-cols-1 lg:grid-cols-12 gap-12",
+    "main_content": "lg:col-span-8",
+    "side_panel": "lg:col-span-4 h-[calc(100vh-4rem)] sticky top-8"
+  },
+  "components": {
+    "glass_panel": {
+      "background": "bg-white/5",
+      "blur": "backdrop-blur-3xl",
+      "border": "border border-white/10",
+      "shadow": "shadow-[0_8px_32px_rgba(0,0,0,0.5)]",
+      "radius": "rounded-3xl"
+    },
+    "interactive_word": {
+      "default": "cursor-pointer transition-colors duration-200 relative inline-block",
+      "hover": "hover:bg-cyan-500/20 hover:text-cyan-300 rounded px-1",
+      "active": "bg-cyan-500/30 text-cyan-300 rounded px-1 shadow-[0_0_10px_rgba(34,211,238,0.3)]"
+    },
+    "buttons": {
+      "primary": "bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/20 rounded-full px-8 py-4 transition-all hover:scale-105 active:scale-95",
+      "glowing": "bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 hover:bg-cyan-500/30 hover:shadow-[0_0_20px_rgba(34,211,238,0.4)] rounded-full px-8 py-4"
+    }
+  },
+  "motion": {
+    "panel_slide": {
+      "initial": { "x": "100%", "opacity": 0 },
+      "animate": { "x": 0, "opacity": 1 },
+      "exit": { "x": "100%", "opacity": 0 },
+      "transition": { "type": "spring", "damping": 25, "stiffness": 100 }
+    },
+    "word_pop": {
+      "whileHover": { "scale": 1.05 },
+      "whileTap": { "scale": 0.95 }
+    },
+    "background_blobs": "Use Framer Motion to create slow-moving, large, highly blurred div circles (blur-3xl, opacity-20) in cyan, fuchsia, and acid green floating behind the main content to simulate a spatial fluid environment."
+  },
+  "media": {
+    "image_urls": {
+      "hero_background": {
+        "url": "https://images.unsplash.com/photo-1764258906159-3f5952286f5e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODF8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGRhcmslMjBuZW9uJTIwZmx1aWR8ZW58MHx8fHwxNzc0ODE1NTM4fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Abstract blue liquid flowing. Use as full page background image with 10-20% opacity and heavy blur for spatial computing feel.",
+        "category": "background"
+      },
+      "secondary_background": {
+        "url": "https://images.unsplash.com/photo-1764258906659-e966a089ed7c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODF8MHwxfHNlYXJjaHwyfHxhYnN0cmFjdCUyMGRhcmslMjBuZW9uJTIwZmx1aWR8ZW58MHx8fHwxNzc0ODE1NTM4fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Abstract purple fluid. Mix with the blue liquid for organic gradients.",
+        "category": "background"
+      }
+    }
+  },
+  "instructions_to_main_agent": [
+    "Build the app using React, Tailwind CSS, and Framer Motion for the UI.",
+    "Font Implementation: Use 'Outfit' for headings and 'Manrope' for body text from Google Fonts.",
+    "Word Interactivity: For the paper reading view, tokenize the text into words. Wrap every word in a <span> (or motion.span) applying the 'interactive_word' styles. When clicked, it should trigger the AI side panel and pass the word and its surrounding sentence context.",
+    "Side Panel UI: The contextual explanation panel must slide in from the right using the 'panel_slide' motion settings. It must use the 'glass_panel' component styles to overlay gracefully over the background, heavily blurring what's behind it (Apple visionOS 2050 style).",
+    "Background Aesthetic: Implement 'Jony Ive on acid 2050' by using the provided image_urls as a deeply blurred, dark background layer, layered with slow-moving Framer Motion gradient blobs (cyan/fuchsia/acid green) to create a 'living' environment.",
+    "Form Elements & Modals: Use Shadcn UI for standard functionality like the PDF Dropzone, but heavily customize them. Strip out any generic Vercel/Stripe styles and replace them with the 'Crystal Glass' aesthetic (transparent backgrounds, 1px white/10 borders, heavy backdrop blurs).",
+    "Caching System: Implement the frontend logic to cache AI responses by a hash of (word + context) so redundant API calls are never made.",
+    "Testing: CRITICAL: Ensure all interactive elements (words, buttons, dropzones, close panel buttons) have 'data-testid' attributes for robust automated testing."
+  ]
+}
