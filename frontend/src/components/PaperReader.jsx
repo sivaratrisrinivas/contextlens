@@ -9,8 +9,7 @@ import axios from 'axios';
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 /**
- * Fingerprint generation: O(n) where n = string length.
- * Uses DJB2 hash — deterministic, fast, collision-resistant for our use case.
+ * DJB2 hash — O(n) where n = string length. Deterministic, fast.
  */
 function makeFingerprint(word, context) {
   const raw = `${word.toLowerCase().trim()}|${context.trim()}`;
@@ -22,49 +21,63 @@ function makeFingerprint(word, context) {
 }
 
 /**
- * Extract surrounding context window.
- * O(k) where k = window size (constant = 40 words max).
+ * Split content into paragraphs, then tokenize each paragraph into words.
+ * Preserves paragraph structure from PDF extraction.
+ * Returns: [ { paragraphIndex, tokens: [{text, space, globalIndex, clean, fingerprint, context}] } ]
  */
-function extractContext(wordIndex, words) {
-  const start = Math.max(0, wordIndex - 20);
-  const end = Math.min(words.length, wordIndex + 20);
-  const parts = [];
-  for (let i = start; i < end; i++) {
-    parts.push(words[i].text);
-  }
-  return parts.join(' ');
-}
+function tokenizeParagraphs(text) {
+  // Split by double newlines (paragraph breaks) or single newlines followed by blank lines
+  const rawParagraphs = text.split(/\n{2,}/);
+  const paragraphs = [];
+  let globalIdx = 0;
 
-/**
- * Tokenize text into word tokens.
- * O(N) where N = total characters. Single regex pass.
- * Pre-computes fingerprints for all words so click handlers are O(1).
- */
-function tokenizeWithFingerprints(text) {
-  const tokens = [];
-  const regex = /(\S+)(\s*)/g;
-  let match;
-  let idx = 0;
-  while ((match = regex.exec(text)) !== null) {
-    tokens.push({
-      text: match[1],
-      space: match[2],
-      index: idx,
-      clean: match[1].replace(/[^a-zA-Z0-9'-]/g, '').toLowerCase(),
-      fingerprint: null, // computed in second pass
-    });
-    idx++;
-  }
-  // Second pass: compute fingerprints now that we have all words
-  // O(N * k) where k = context window (constant) → O(N) total
-  for (let i = 0; i < tokens.length; i++) {
-    if (tokens[i].clean) {
-      const ctx = extractContext(i, tokens);
-      tokens[i].fingerprint = makeFingerprint(tokens[i].clean, ctx);
-      tokens[i].context = ctx;
+  // First pass: create all tokens with global indices
+  const allTokens = [];
+  const paragraphMeta = [];
+
+  for (let pIdx = 0; pIdx < rawParagraphs.length; pIdx++) {
+    const paraText = rawParagraphs[pIdx].trim();
+    if (!paraText) continue;
+
+    const tokens = [];
+    const regex = /(\S+)(\s*)/g;
+    let match;
+    while ((match = regex.exec(paraText)) !== null) {
+      const token = {
+        text: match[1],
+        space: match[2],
+        globalIndex: globalIdx,
+        clean: match[1].replace(/[^a-zA-Z0-9'-]/g, '').toLowerCase(),
+        fingerprint: null,
+        context: null,
+      };
+      tokens.push(token);
+      allTokens.push(token);
+      globalIdx++;
+    }
+
+    if (tokens.length > 0) {
+      paragraphMeta.push({ paragraphIndex: pIdx, startGlobal: tokens[0].globalIndex, tokens });
     }
   }
-  return tokens;
+
+  // Second pass: compute fingerprints using surrounding context window
+  // O(N) total — each token visits a fixed-size window
+  for (let i = 0; i < allTokens.length; i++) {
+    const t = allTokens[i];
+    if (t.clean) {
+      const start = Math.max(0, i - 20);
+      const end = Math.min(allTokens.length, i + 20);
+      const contextWords = [];
+      for (let j = start; j < end; j++) {
+        contextWords.push(allTokens[j].text);
+      }
+      t.context = contextWords.join(' ');
+      t.fingerprint = makeFingerprint(t.clean, t.context);
+    }
+  }
+
+  return { paragraphs: paragraphMeta, totalWords: allTokens.length };
 }
 
 const WordToken = ({ token, isActive, isBookmarked, onClick }) => {
@@ -79,7 +92,7 @@ const WordToken = ({ token, isActive, isBookmarked, onClick }) => {
       <span
         className={classes}
         onClick={() => onClick(token)}
-        data-testid={`word-${token.index}`}
+        data-testid={`word-${token.globalIndex}`}
       >
         {token.text}
       </span>
@@ -218,68 +231,47 @@ export const PaperReader = ({ paper, onBack }) => {
   const [activeLookup, setActiveLookup] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [bookmarkedWords, setBookmarkedWords] = useState(new Set());
-  const [cacheStats, setCacheStats] = useState({ hits: 0, misses: 0 });
+  const [cachedCount, setCachedCount] = useState(0);
 
-  /**
-   * Cache: Map<fingerprint, lookup_data>
-   * - Map.get() is O(1) amortized
-   * - Populated on mount via batch prefetch, then on each new lookup
-   */
+  // Map<fingerprint, lookup_data> — O(1) get/set
   const cacheRef = useRef(new Map());
 
-  /**
-   * Tokenization with pre-computed fingerprints: O(N) one-time cost.
-   * Each token already has its fingerprint and context, so click = O(1) lookup.
-   */
-  const words = useMemo(() => tokenizeWithFingerprints(paper.content), [paper.content]);
+  // Tokenize into paragraphs with pre-computed fingerprints: O(N) one-time
+  const { paragraphs, totalWords } = useMemo(
+    () => tokenizeParagraphs(paper.content),
+    [paper.content]
+  );
 
-  /**
-   * Batch prefetch: On paper load, fetch ALL cached lookups for this paper.
-   * O(k) where k = number of previously cached entries.
-   * This makes repeated word clicks instant (no network round-trip).
-   */
+  // Batch prefetch all cached lookups on paper load: O(k) one-time
   useEffect(() => {
     const prefetch = async () => {
       try {
         const res = await axios.get(`${API}/lookup/paper-cache/${paper.id}`);
-        const entries = res.data;
         const cache = cacheRef.current;
-        for (const entry of entries) {
+        for (const entry of res.data) {
           cache.set(entry.fingerprint, entry);
         }
-        if (entries.length > 0) {
-          setCacheStats(prev => ({ ...prev, hits: entries.length }));
-        }
+        setCachedCount(cache.size);
       } catch {
-        // No cached data yet, that's fine
+        // No cached data yet
       }
     };
     prefetch();
   }, [paper.id]);
 
-  /**
-   * Word click handler: O(1) amortized.
-   * 1. Token already has fingerprint (pre-computed) → no hash computation
-   * 2. Map.get(fingerprint) → O(1) lookup
-   * 3. Cache hit → instant display, no API call
-   * 4. Cache miss → API call (O(1) amortized insert after)
-   */
+  // Word click: O(1) cache lookup, then API if miss
   const handleWordClick = useCallback(async (token) => {
     if (!token.clean || !token.fingerprint) return;
 
     const cache = cacheRef.current;
-
-    // O(1) cache lookup
     const cached = cache.get(token.fingerprint);
     if (cached) {
       setActiveLookup({ ...cached, cached: true });
-      setCacheStats(prev => ({ ...prev, hits: prev.hits + 1 }));
       return;
     }
 
     setIsLoading(true);
     setActiveLookup(null);
-    setCacheStats(prev => ({ ...prev, misses: prev.misses + 1 }));
 
     try {
       const res = await axios.post(`${API}/lookup`, {
@@ -287,11 +279,10 @@ export const PaperReader = ({ paper, onBack }) => {
         context: token.context,
         paper_id: paper.id
       });
-      const data = res.data;
-      // O(1) cache insert
-      cache.set(token.fingerprint, data);
-      setActiveLookup(data);
-    } catch (err) {
+      cache.set(token.fingerprint, res.data);
+      setCachedCount(cache.size);
+      setActiveLookup(res.data);
+    } catch {
       toast.error('Failed to get explanation');
     } finally {
       setIsLoading(false);
@@ -310,7 +301,7 @@ export const PaperReader = ({ paper, onBack }) => {
       });
       setBookmarkedWords(prev => new Set([...prev, activeLookup.word.toLowerCase()]));
       toast.success('Explanation saved');
-    } catch (err) {
+    } catch {
       toast.error('Failed to save bookmark');
     }
   }, [activeLookup, paper]);
@@ -340,32 +331,37 @@ export const PaperReader = ({ paper, onBack }) => {
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            {cacheRef.current.size > 0 && (
+            {cachedCount > 0 && (
               <Badge className="bg-lime-500/10 text-lime-400 border-lime-500/20 text-xs" data-testid="cache-badge">
                 <Zap className="w-3 h-3 mr-1" />
-                {cacheRef.current.size} cached
+                {cachedCount} cached
               </Badge>
             )}
             <Badge className="bg-cyan-500/10 text-cyan-400 border-cyan-500/20 text-xs">
-              {words.length} words
+              {totalWords} words
             </Badge>
           </div>
         </div>
       </div>
 
-      {/* Reading area */}
-      <div className="max-w-4xl mx-auto px-8 sm:px-16 py-12 sm:py-16 relative z-10">
-        <div className="text-gray-200 leading-[1.9] text-[17px] tracking-wide" data-testid="paper-content">
-          {words.map((token) => (
-            <WordToken
-              key={token.index}
-              token={token}
-              isActive={activeLookup?.word?.toLowerCase() === token.clean}
-              isBookmarked={bookmarkedWords.has(token.clean)}
-              onClick={handleWordClick}
-            />
-          ))}
-        </div>
+      {/* Reading area — paragraph-based rendering preserves PDF structure */}
+      <div className="max-w-4xl mx-auto px-8 sm:px-16 py-12 sm:py-16 relative z-10" data-testid="paper-content">
+        {paragraphs.map((para) => (
+          <p
+            key={para.paragraphIndex}
+            className="text-gray-200 leading-[1.9] text-[17px] tracking-wide mb-5"
+          >
+            {para.tokens.map((token) => (
+              <WordToken
+                key={token.globalIndex}
+                token={token}
+                isActive={activeLookup?.word?.toLowerCase() === token.clean}
+                isBookmarked={bookmarkedWords.has(token.clean)}
+                onClick={handleWordClick}
+              />
+            ))}
+          </p>
+        ))}
       </div>
 
       {/* Side panel */}

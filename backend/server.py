@@ -6,6 +6,7 @@ import os
 import logging
 import hashlib
 import uuid
+import re
 import io
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
@@ -107,15 +108,22 @@ async def create_paper(title: str = Form(...), content: str = Form(None), file: 
         if not file.filename.lower().endswith('.pdf'):
             raise HTTPException(400, "Only PDF files are supported")
         data = await file.read()
-        if len(data) > 50 * 1024 * 1024:  # 50MB limit
-            raise HTTPException(400, "PDF file too large (max 50MB)")
         try:
             with pdfplumber.open(io.BytesIO(data)) as pdf:
                 pages = []
                 for page in pdf.pages:
-                    text = page.extract_text()
+                    # Use layout-aware extraction to preserve paragraph structure
+                    text = page.extract_text(layout=True)
                     if text:
-                        pages.append(text)
+                        # Clean up excessive whitespace from layout mode while keeping paragraph breaks
+                        cleaned_lines = []
+                        for line in text.split('\n'):
+                            # Collapse multiple spaces within a line (layout mode adds many)
+                            line = re.sub(r'  +', ' ', line).strip()
+                            if line:
+                                cleaned_lines.append(line)
+                        if cleaned_lines:
+                            pages.append('\n'.join(cleaned_lines))
                 # Smart body matter extraction: strips front/back matter from books
                 paper_content = extract_body_matter(pages)
             if not paper_content.strip():
