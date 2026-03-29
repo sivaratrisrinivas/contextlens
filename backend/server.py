@@ -48,6 +48,17 @@ class LookupRequest(BaseModel):
     context: str
     paper_id: str
 
+class RhetoricalRequest(BaseModel):
+    word: str
+    context: str
+    sentence: str
+    paper_id: str
+
+class AssumptionsRequest(BaseModel):
+    sentence: str
+    context: str
+    paper_id: str
+
 class LookupResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str
@@ -93,6 +104,48 @@ async def get_ai_explanation(word: str, context: str) -> str:
     ).with_model("gemini", "gemini-3-flash-preview")
 
     msg = UserMessage(text=f"Word: \"{word}\"\n\nContext: \"{context}\"\n\nExplain this word in the given context.")
+    response = await chat.send_message(msg)
+    return response
+
+
+async def get_rhetorical_intent(word: str, sentence: str, context: str) -> str:
+    chat = LlmChat(
+        api_key=EMERGENT_KEY,
+        session_id=f"rhetorical-{uuid.uuid4()}",
+        system_message=(
+            "You are a senior academic close-reading analyst. Your job is NOT to define words. "
+            "Your job is to explain WHY the author chose this specific word in this specific sentence "
+            "within this argument. Analyze the rhetorical function: What work is this word doing? "
+            "What would change if the author had used a synonym? What framing, emphasis, or argumentative "
+            "move does this word choice accomplish? Be specific and incisive. Under 150 words."
+        )
+    ).with_model("gemini", "gemini-3-flash-preview")
+
+    msg = UserMessage(
+        text=f"Word: \"{word}\"\n\nSentence: \"{sentence}\"\n\nBroader context: \"{context}\"\n\n"
+             f"Why is the author using \"{word}\" here specifically? What rhetorical work is it doing in this argument?"
+    )
+    response = await chat.send_message(msg)
+    return response
+
+
+async def get_assumption_stresstest(sentence: str, context: str) -> str:
+    chat = LlmChat(
+        api_key=EMERGENT_KEY,
+        session_id=f"assumptions-{uuid.uuid4()}",
+        system_message=(
+            "You are a rigorous epistemologist and research methodologist. When given a claim or sentence "
+            "from an academic text, identify the 2-3 hidden assumptions it rests on. For each assumption, "
+            "explain: (1) what the assumption is, (2) what would have to be false for the claim to break down, "
+            "and (3) whether this assumption is typically contested in the field. Be precise and adversarial — "
+            "think like a senior researcher poking holes in a peer review. Under 200 words total."
+        )
+    ).with_model("gemini", "gemini-3-flash-preview")
+
+    msg = UserMessage(
+        text=f"Sentence/Claim: \"{sentence}\"\n\nSurrounding context: \"{context}\"\n\n"
+             f"What are the 2-3 hidden assumptions this claim rests on? What would have to be false for it to be wrong?"
+    )
     response = await chat.send_message(msg)
     return response
 
@@ -216,6 +269,83 @@ async def get_paper_cache(paper_id: str):
         e["cached"] = True
     return entries
 
+# --- Rhetorical Intent Routes ---
+@api_router.post("/rhetorical")
+async def rhetorical_intent(req: RhetoricalRequest):
+    fp = make_fingerprint(f"rhetorical:{req.word}", req.sentence)
+
+    cached = await db.rhetorical_cache.find_one({"fingerprint": fp}, {"_id": 0})
+    if cached:
+        cached["cached"] = True
+        return cached
+
+    try:
+        analysis = await get_rhetorical_intent(req.word, req.sentence, req.context)
+    except Exception as e:
+        logger.error(f"Rhetorical analysis failed: {e}")
+        raise HTTPException(500, "Analysis failed. Please try again.")
+
+    doc = {
+        "id": str(uuid.uuid4()),
+        "word": req.word,
+        "sentence": req.sentence,
+        "context": req.context,
+        "analysis": analysis,
+        "fingerprint": fp,
+        "paper_id": req.paper_id,
+        "cached": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.rhetorical_cache.insert_one(doc)
+    return {k: v for k, v in doc.items() if k != "_id"}
+
+@api_router.get("/rhetorical/paper-cache/{paper_id}")
+async def get_rhetorical_cache(paper_id: str):
+    entries = await db.rhetorical_cache.find(
+        {"paper_id": paper_id}, {"_id": 0}
+    ).to_list(5000)
+    for e in entries:
+        e["cached"] = True
+    return entries
+
+# --- Assumption Stress-Test Routes ---
+@api_router.post("/assumptions")
+async def assumption_stresstest(req: AssumptionsRequest):
+    fp = make_fingerprint("assumptions", req.sentence)
+
+    cached = await db.assumptions_cache.find_one({"fingerprint": fp}, {"_id": 0})
+    if cached:
+        cached["cached"] = True
+        return cached
+
+    try:
+        analysis = await get_assumption_stresstest(req.sentence, req.context)
+    except Exception as e:
+        logger.error(f"Assumptions analysis failed: {e}")
+        raise HTTPException(500, "Analysis failed. Please try again.")
+
+    doc = {
+        "id": str(uuid.uuid4()),
+        "sentence": req.sentence,
+        "context": req.context,
+        "analysis": analysis,
+        "fingerprint": fp,
+        "paper_id": req.paper_id,
+        "cached": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.assumptions_cache.insert_one(doc)
+    return {k: v for k, v in doc.items() if k != "_id"}
+
+@api_router.get("/assumptions/paper-cache/{paper_id}")
+async def get_assumptions_cache(paper_id: str):
+    entries = await db.assumptions_cache.find(
+        {"paper_id": paper_id}, {"_id": 0}
+    ).to_list(5000)
+    for e in entries:
+        e["cached"] = True
+    return entries
+
 # --- Bookmark Routes ---
 @api_router.post("/bookmarks")
 async def create_bookmark(req: BookmarkCreate):
@@ -275,6 +405,10 @@ async def startup():
     # Create indexes for O(log n) → effective O(1) cache lookups
     await db.word_cache.create_index("fingerprint", unique=True)
     await db.word_cache.create_index("paper_id")  # For batch cache fetch
+    await db.rhetorical_cache.create_index("fingerprint", unique=True)
+    await db.rhetorical_cache.create_index("paper_id")
+    await db.assumptions_cache.create_index("fingerprint", unique=True)
+    await db.assumptions_cache.create_index("paper_id")
     await db.papers.create_index("id", unique=True)
     await db.bookmarks.create_index("id", unique=True)
     logger.info("Database indexes created")

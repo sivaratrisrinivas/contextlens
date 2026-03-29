@@ -267,6 +267,166 @@ class PaperReadingAPITester:
         
         return success
 
+    def test_rhetorical_intent(self):
+        """Test rhetorical intent analysis"""
+        if not self.created_paper_id:
+            print("❌ Skipped - No paper ID available")
+            return False
+            
+        rhetorical_data = {
+            "word": "revolutionized",
+            "sentence": "Artificial intelligence has revolutionized many fields.",
+            "context": "Artificial intelligence has revolutionized many fields. Machine learning algorithms can process vast amounts of data to identify patterns and make predictions.",
+            "paper_id": self.created_paper_id
+        }
+        
+        success, response = self.run_test(
+            "Rhetorical Intent Analysis",
+            "POST",
+            "rhetorical",
+            200,
+            data=rhetorical_data
+        )
+        
+        if success:
+            print(f"   Word: {response.get('word', 'N/A')}")
+            print(f"   Analysis length: {len(response.get('analysis', ''))}")
+            print(f"   Cached: {response.get('cached', False)}")
+            print(f"   Fingerprint: {response.get('fingerprint', 'N/A')}")
+        
+        return success
+
+    def test_rhetorical_cache(self):
+        """Test rhetorical intent caching"""
+        if not self.created_paper_id:
+            print("❌ Skipped - No paper ID available")
+            return False
+            
+        rhetorical_data = {
+            "word": "revolutionized",
+            "sentence": "Artificial intelligence has revolutionized many fields.",
+            "context": "Artificial intelligence has revolutionized many fields. Machine learning algorithms can process vast amounts of data to identify patterns and make predictions.",
+            "paper_id": self.created_paper_id
+        }
+        
+        success, response = self.run_test(
+            "Rhetorical Intent (Cache Test)",
+            "POST",
+            "rhetorical",
+            200,
+            data=rhetorical_data
+        )
+        
+        if success:
+            cached = response.get('cached', False)
+            print(f"   Cached result: {cached}")
+            if cached:
+                print("✅ Rhetorical caching is working correctly")
+            else:
+                print("⚠️  Expected cached result but got fresh analysis")
+        
+        return success
+
+    def test_assumptions_analysis(self):
+        """Test assumption stress-test analysis"""
+        if not self.created_paper_id:
+            print("❌ Skipped - No paper ID available")
+            return False
+            
+        assumptions_data = {
+            "sentence": "Machine learning algorithms can process vast amounts of data to identify patterns and make predictions.",
+            "context": "Artificial intelligence has revolutionized many fields. Machine learning algorithms can process vast amounts of data to identify patterns and make predictions. Natural language processing enables computers to understand and generate human language.",
+            "paper_id": self.created_paper_id
+        }
+        
+        success, response = self.run_test(
+            "Assumptions Stress-Test Analysis",
+            "POST",
+            "assumptions",
+            200,
+            data=assumptions_data
+        )
+        
+        if success:
+            print(f"   Sentence analyzed: {response.get('sentence', 'N/A')[:50]}...")
+            print(f"   Analysis length: {len(response.get('analysis', ''))}")
+            print(f"   Cached: {response.get('cached', False)}")
+            print(f"   Fingerprint: {response.get('fingerprint', 'N/A')}")
+        
+        return success
+
+    def test_assumptions_cache(self):
+        """Test assumptions analysis caching"""
+        if not self.created_paper_id:
+            print("❌ Skipped - No paper ID available")
+            return False
+            
+        assumptions_data = {
+            "sentence": "Machine learning algorithms can process vast amounts of data to identify patterns and make predictions.",
+            "context": "Artificial intelligence has revolutionized many fields. Machine learning algorithms can process vast amounts of data to identify patterns and make predictions. Natural language processing enables computers to understand and generate human language.",
+            "paper_id": self.created_paper_id
+        }
+        
+        success, response = self.run_test(
+            "Assumptions Analysis (Cache Test)",
+            "POST",
+            "assumptions",
+            200,
+            data=assumptions_data
+        )
+        
+        if success:
+            cached = response.get('cached', False)
+            print(f"   Cached result: {cached}")
+            if cached:
+                print("✅ Assumptions caching is working correctly")
+            else:
+                print("⚠️  Expected cached result but got fresh analysis")
+        
+        return success
+
+    def test_rhetorical_paper_cache(self):
+        """Test batch rhetorical cache endpoint for a paper"""
+        if not self.created_paper_id:
+            print("❌ Skipped - No paper ID available")
+            return False
+            
+        success, response = self.run_test(
+            "Get Rhetorical Paper Cache (Batch)",
+            "GET",
+            f"rhetorical/paper-cache/{self.created_paper_id}",
+            200
+        )
+        
+        if success and isinstance(response, list):
+            print(f"   Found {len(response)} cached rhetorical entries for paper")
+            if len(response) > 0:
+                print(f"   First cached word: {response[0].get('word', 'No word')}")
+                print(f"   All entries marked as cached: {all(entry.get('cached', False) for entry in response)}")
+        
+        return success
+
+    def test_assumptions_paper_cache(self):
+        """Test batch assumptions cache endpoint for a paper"""
+        if not self.created_paper_id:
+            print("❌ Skipped - No paper ID available")
+            return False
+            
+        success, response = self.run_test(
+            "Get Assumptions Paper Cache (Batch)",
+            "GET",
+            f"assumptions/paper-cache/{self.created_paper_id}",
+            200
+        )
+        
+        if success and isinstance(response, list):
+            print(f"   Found {len(response)} cached assumptions entries for paper")
+            if len(response) > 0:
+                print(f"   First cached sentence: {response[0].get('sentence', 'No sentence')[:50]}...")
+                print(f"   All entries marked as cached: {all(entry.get('cached', False) for entry in response)}")
+        
+        return success
+
     def test_delete_paper(self):
         """Test deleting a paper"""
         if not self.created_paper_id:
@@ -297,6 +457,12 @@ def main():
         tester.test_word_lookup,
         tester.test_word_lookup_cache,
         tester.test_paper_cache_batch,
+        tester.test_rhetorical_intent,
+        tester.test_rhetorical_cache,
+        tester.test_rhetorical_paper_cache,
+        tester.test_assumptions_analysis,
+        tester.test_assumptions_cache,
+        tester.test_assumptions_paper_cache,
         tester.test_create_bookmark,
         tester.test_list_bookmarks,
         tester.test_delete_bookmark,
