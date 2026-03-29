@@ -1,97 +1,85 @@
 {
-  "theme": "dark",
-  "archetype": "7 - Electric & Neon (Acid Glassmorphism / Spatial Computing)",
+  "theme": "light",
+  "archetype": "Archetype 4 (Swiss & High-Contrast) + Glassmorphism (Crystal Variant)",
+  "design_philosophy": "Radical minimalism inspired by Jony Ive. Remove all cognitive load. Strip unnecessary text/labels. Let the content breathe. The interface should disappear and the content becomes the experience itself. High emphasis on typography, whitespace, and optical clarity.",
   "colors": {
-    "background": {
-      "base": "#050505",
-      "surface": "#0a0a0a",
-      "glass": "rgba(255, 255, 255, 0.03)"
-    },
-    "text": {
-      "primary": "#FFFFFF",
-      "secondary": "#A3A3A3",
-      "accent": "#22d3ee"
-    },
-    "accents": {
-      "cyan": "#22d3ee",
-      "acid_green": "#a3e635",
-      "fuchsia": "#d946ef"
-    }
+    "background_app": "#F5F5F7",
+    "background_paper": "#FFFFFF",
+    "text_primary": "#1D1D1F",
+    "text_secondary": "#86868B",
+    "border_subtle": "rgba(0, 0, 0, 0.05)",
+    "highlight_hover": "#F5F5F7",
+    "highlight_active": "#E5E5EA",
+    "glass_panel": "rgba(255, 255, 255, 0.75)",
+    "glass_border": "rgba(255, 255, 255, 0.4)"
   },
   "typography": {
-    "fonts": {
-      "headings": "Outfit",
-      "body": "Manrope",
-      "mono": "JetBrains Mono"
+    "font_families": {
+      "ui_headings": "'Manrope', sans-serif",
+      "ui_body": "'Inter', sans-serif",
+      "paper_text": "'Newsreader', serif"
     },
     "hierarchy": {
-      "h1": "text-5xl sm:text-6xl lg:text-7xl tracking-tighter font-black",
-      "h2": "text-3xl sm:text-4xl lg:text-5xl tracking-tight font-bold",
-      "h3": "text-xl sm:text-2xl font-semibold",
-      "body": "text-lg sm:text-xl leading-relaxed tracking-wide text-gray-200",
-      "small": "text-sm uppercase tracking-[0.2em] text-gray-400"
+      "h1_paper_title": "text-4xl sm:text-5xl font-paper_text tracking-tight text-[#1D1D1F] leading-tight",
+      "h2_panel_word": "text-2xl sm:text-3xl font-ui_headings font-medium tracking-tight text-[#1D1D1F]",
+      "body_paper": "text-lg sm:text-xl font-paper_text text-[#1D1D1F] leading-relaxed max-w-prose",
+      "body_ui": "text-sm sm:text-base font-ui_body text-[#86868B]",
+      "logo_text": "text-xl font-ui_headings font-bold tracking-tighter text-[#1D1D1F]"
     }
   },
-  "spacing_and_layout": {
-    "philosophy": "Generous Spacing, Spatial Computing Canvas, Infinity Canvas",
-    "reading_area": "max-w-4xl mx-auto p-8 sm:p-16 lg:p-24",
-    "grid": "grid-cols-1 lg:grid-cols-12 gap-12",
-    "main_content": "lg:col-span-8",
-    "side_panel": "lg:col-span-4 h-[calc(100vh-4rem)] sticky top-8"
+  "layout_spacing": {
+    "app_container": "bg-[#F5F5F7] min-h-screen w-full font-ui_body selection:bg-black/10",
+    "header": "fixed top-0 left-0 right-0 h-16 z-50 backdrop-blur-2xl bg-white/70 border-b border-black/5 flex items-center justify-between px-6 sm:px-12",
+    "paper_container": "max-w-3xl mx-auto pt-32 pb-32 px-6 sm:px-12 bg-[#FFFFFF] min-h-screen shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-none sm:rounded-3xl sm:my-8 sm:min-h-[calc(100vh-4rem)]",
+    "side_panel": "fixed top-0 right-0 h-full w-full sm:w-[400px] z-50 backdrop-blur-3xl bg-white/80 border-l border-black/5 shadow-2xl p-8 flex flex-col gap-6 transform transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+    "empty_state": "flex flex-col items-center justify-center min-h-[60vh] text-center max-w-md mx-auto space-y-8"
   },
   "components": {
-    "glass_panel": {
-      "background": "bg-white/5",
-      "blur": "backdrop-blur-3xl",
-      "border": "border border-white/10",
-      "shadow": "shadow-[0_8px_32px_rgba(0,0,0,0.5)]",
-      "radius": "rounded-3xl"
+    "killer_logo": {
+      "description": "A combination of a Lucide 'Aperture' or 'Focus' icon (stroke-width 1.5) next to 'Context Lens' in Manrope bold, tracking-tighter. Absolute simplicity.",
+      "classes": "flex items-center gap-2 text-[#1D1D1F]"
     },
-    "interactive_word": {
-      "default": "cursor-pointer transition-colors duration-200 relative inline-block",
-      "hover": "hover:bg-cyan-500/20 hover:text-cyan-300 rounded px-1",
-      "active": "bg-cyan-500/30 text-cyan-300 rounded px-1 shadow-[0_0_10px_rgba(34,211,238,0.3)]"
+    "icon_buttons": {
+      "description": "Replace text links with minimal stroke icons. Hover state adds a subtle soft background.",
+      "classes": "p-2 rounded-full hover:bg-black/5 text-[#1D1D1F] transition-colors flex items-center justify-center"
     },
-    "buttons": {
-      "primary": "bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/20 rounded-full px-8 py-4 transition-all hover:scale-105 active:scale-95",
-      "glowing": "bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 hover:bg-cyan-500/30 hover:shadow-[0_0_20px_rgba(34,211,238,0.4)] rounded-full px-8 py-4"
+    "clickable_word": {
+      "description": "Every word in the paper text. Invisible until hovered. Radical minimal feedback.",
+      "classes": "inline-block cursor-pointer transition-colors duration-200 rounded-sm px-[1px] -mx-[1px]",
+      "hover": "hover:bg-[#F5F5F7] hover:text-[#1D1D1F]",
+      "active": "bg-[#E5E5EA] text-[#1D1D1F]"
+    },
+    "upload_zone": {
+      "description": "Invisible until hovered, minimal dashed border or just an icon. Drag and drop area.",
+      "classes": "w-full aspect-video rounded-3xl border border-black/10 border-dashed flex flex-col items-center justify-center gap-4 hover:border-black/20 hover:bg-black/[0.02] transition-all cursor-pointer bg-white"
+    },
+    "bookmark_card": {
+      "description": "A bookmarked explanation in the library. Flush, no border, just a separator line.",
+      "classes": "py-6 border-b border-black/5 flex flex-col gap-2 last:border-0"
     }
   },
-  "motion": {
-    "panel_slide": {
-      "initial": { "x": "100%", "opacity": 0 },
-      "animate": { "x": 0, "opacity": 1 },
-      "exit": { "x": "100%", "opacity": 0 },
-      "transition": { "type": "spring", "damping": 25, "stiffness": 100 }
-    },
-    "word_pop": {
-      "whileHover": { "scale": 1.05 },
-      "whileTap": { "scale": 0.95 }
-    },
-    "background_blobs": "Use Framer Motion to create slow-moving, large, highly blurred div circles (blur-3xl, opacity-20) in cyan, fuchsia, and acid green floating behind the main content to simulate a spatial fluid environment."
+  "motion_and_interactions": {
+    "hover_states": "Use subtle background shifts (black/5) instead of scale transforms to maintain a serene, grounded feel.",
+    "panel_slide": "Use Framer Motion with ease: [0.16, 1, 0.3, 1] (Apple's signature spring/ease) for the side panel.",
+    "fade_in": "Content should gently fade in on load with a slight Y translation (y: 10, opacity: 0)."
   },
   "media": {
-    "image_urls": {
-      "hero_background": {
-        "url": "https://images.unsplash.com/photo-1764258906159-3f5952286f5e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODF8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGRhcmslMjBuZW9uJTIwZmx1aWR8ZW58MHx8fHwxNzc0ODE1NTM4fDA&ixlib=rb-4.1.0&q=85",
-        "description": "Abstract blue liquid flowing. Use as full page background image with 10-20% opacity and heavy blur for spatial computing feel.",
-        "category": "background"
-      },
-      "secondary_background": {
-        "url": "https://images.unsplash.com/photo-1764258906659-e966a089ed7c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODF8MHwxfHNlYXJjaHwyfHxhYnN0cmFjdCUyMGRhcmslMjBuZW9uJTIwZmx1aWR8ZW58MHx8fHwxNzc0ODE1NTM4fDA&ixlib=rb-4.1.0&q=85",
-        "description": "Abstract purple fluid. Mix with the blue liquid for organic gradients.",
-        "category": "background"
-      }
+    "empty_state_texture": {
+      "url": "https://images.pexels.com/photos/7794361/pexels-photo-7794361.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "description": "Use as a very subtle, low-opacity (10-20%) background image for the empty state or upload screen to give it an elegant, tactile feel."
+    },
+    "workspace_ambient": {
+      "url": "https://images.pexels.com/photos/4386356/pexels-photo-4386356.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "description": "Use in the marketing/landing area if needed, behind a glassmorphism overlay."
     }
   },
   "instructions_to_main_agent": [
-    "Build the app using React, Tailwind CSS, and Framer Motion for the UI.",
-    "Font Implementation: Use 'Outfit' for headings and 'Manrope' for body text from Google Fonts.",
-    "Word Interactivity: For the paper reading view, tokenize the text into words. Wrap every word in a <span> (or motion.span) applying the 'interactive_word' styles. When clicked, it should trigger the AI side panel and pass the word and its surrounding sentence context.",
-    "Side Panel UI: The contextual explanation panel must slide in from the right using the 'panel_slide' motion settings. It must use the 'glass_panel' component styles to overlay gracefully over the background, heavily blurring what's behind it (Apple visionOS 2050 style).",
-    "Background Aesthetic: Implement 'Jony Ive on acid 2050' by using the provided image_urls as a deeply blurred, dark background layer, layered with slow-moving Framer Motion gradient blobs (cyan/fuchsia/acid green) to create a 'living' environment.",
-    "Form Elements & Modals: Use Shadcn UI for standard functionality like the PDF Dropzone, but heavily customize them. Strip out any generic Vercel/Stripe styles and replace them with the 'Crystal Glass' aesthetic (transparent backgrounds, 1px white/10 borders, heavy backdrop blurs).",
-    "Caching System: Implement the frontend logic to cache AI responses by a hash of (word + context) so redundant API calls are never made.",
-    "Testing: CRITICAL: Ensure all interactive elements (words, buttons, dropzones, close panel buttons) have 'data-testid' attributes for robust automated testing."
+    "Implement the UI using a pristine Light Theme. The background should be a subtle off-white (#F5F5F7) and the reading surface pure white (#FFFFFF).",
+    "Replace ALL text-based buttons (Upload, Bookmarks, Close) with high-quality Lucide icons to reduce cognitive load, as requested.",
+    "For the 'killer logo', use a Lucide 'Aperture' or 'Focus' icon paired with highly tightened typography ('Context Lens'). Do not use a generic image.",
+    "Use 'Newsreader' for the paper reading text and 'Manrope' for the UI and Headings. This creates a high-end editorial feel.",
+    "Ensure every word in the uploaded paper is wrapped in a clickable span. Use minimal visual disruption—only a slight background color change on hover/active (#E5E5EA).",
+    "The AI Explanation panel must feel like Apple's glassmorphism (backdrop-blur-3xl, bg-white/80). It slides in from the right.",
+    "Add 'data-testid' to all interactive elements."
   ]
 }
