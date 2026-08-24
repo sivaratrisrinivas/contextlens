@@ -1,0 +1,274 @@
+{
+  "task": "GS-T8",
+  "metrics": [
+    "cache_hit_rate",
+    "cost_saved_per_session"
+  ],
+  "model": "gemini-3-flash-preview",
+  "date": "2026-08-24",
+  "measured_at_utc": "2026-08-24T20:34:52.288327+00:00",
+  "dataset_size": {
+    "papers": 2,
+    "sessions": 5,
+    "requests": 736,
+    "paper_words": {
+      "harness-paper": 42,
+      "fixture-paper": 312
+    },
+    "paper_tokens": {
+      "harness-paper": 42,
+      "fixture-paper": 312
+    }
+  },
+  "hardware": {
+    "cpu": "Intel(R) Xeon(R) Processor",
+    "cores": 4,
+    "memory_gib": 15.64,
+    "machine": "x86_64",
+    "system": "Linux",
+    "release": "6.12.94+",
+    "python": "3.12.3"
+  },
+  "cache_hit_rate": 0.5366847826086957,
+  "cost_saved_usd_per_session": 0.0488881,
+  "cost_saved_input_only_usd_per_session": 0.0062089,
+  "cache_hit_rate_mean_of_sessions": 0.538787662260331,
+  "cache_hit_rate_first_visit": 0.07397260273972603,
+  "cache_hit_rate_return_visit": 1.0,
+  "cost_saved_usd_per_first_visit": 0.00951525,
+  "cost_saved_usd_per_return_visit": 0.11172975,
+  "api_calls_avoided_per_session": 79.0,
+  "tokenizer": "tiktoken_cl100k_base",
+  "pricing": {
+    "input_usd_per_million": 0.5,
+    "output_usd_per_million": 3.0,
+    "source": "https://ai.google.dev/gemini-api/docs/pricing",
+    "tier": "standard_paid",
+    "retrieved": "2026-08-24",
+    "hit_billing": "zero_api_call",
+    "output_tokens": "prompt_word_cap_proxy_not_live_model_output"
+  },
+  "output_cap_samples": {
+    "lookup": {
+      "word_cap_from_prompt": 150,
+      "token_count": 172,
+      "method": "first_n_words_of_fixture_tokenized"
+    },
+    "rhetorical": {
+      "word_cap_from_prompt": 150,
+      "token_count": 172,
+      "method": "first_n_words_of_fixture_tokenized"
+    },
+    "assumptions": {
+      "word_cap_from_prompt": 200,
+      "token_count": 229,
+      "method": "first_n_words_of_fixture_tokenized"
+    }
+  },
+  "session_model": {
+    "content_min_clean_len": 4,
+    "intent_every_nth_click": 3,
+    "challenge_every_nth_click": 6,
+    "reclick_first_n_define": 5,
+    "return_visit": "same request list against warm backend cache, cold frontend maps plus SHA-256 prefetch"
+  },
+  "closest_harness": {
+    "path": "backend_test.py",
+    "mode": "extend",
+    "reason": "Existing miss-then-hit cache tests for lookup, rhetorical, and assumptions; this bench imports those payloads and adds session-level hit rate and cost."
+  },
+  "live_api": {
+    "ok": false,
+    "status": null,
+    "body": "HTTP Error 403: Forbidden",
+    "url": "https://word-context-lookup.preview.emergentagent.com/api/health"
+  },
+  "failures": [
+    {
+      "kind": "live_api_unavailable",
+      "url": "https://word-context-lookup.preview.emergentagent.com/api/health",
+      "status": null,
+      "detail": "HTTP Error 403: Forbidden",
+      "effect": "Could not confirm cache flags against a running server. Hit rate uses backend/server.py fingerprints in process."
+    }
+  ],
+  "papers": [
+    {
+      "id": "harness-paper",
+      "title": "Test Paper - AI Context Lookup",
+      "source": "backend_test.py HARNESS_PAPER_CONTENT",
+      "words": 42,
+      "tokens": 42,
+      "content_clicks": 33,
+      "request_count_per_visit": 54
+    },
+    {
+      "id": "fixture-paper",
+      "title": "Session fixture: channel capacity notes",
+      "source": "bench/fixtures/session_paper.txt",
+      "words": 312,
+      "tokens": 312,
+      "content_clicks": 204,
+      "request_count_per_visit": 311
+    }
+  ],
+  "sessions": [
+    {
+      "name": "backend_test_cache_pairs",
+      "requests": 6,
+      "hits": 3,
+      "misses": 3,
+      "cache_hit_rate": 0.5,
+      "frontend_map_hit_rate": null,
+      "cost_with_cache_usd": 0.0019505,
+      "cost_if_uncached_usd": 0.003901,
+      "cost_saved_usd": 0.0019505,
+      "cost_saved_input_only_usd": 0.0002315,
+      "input_tokens": 926,
+      "output_tokens_billed_at_word_cap": 573,
+      "output_tokens_if_uncached_at_word_cap": 1146,
+      "by_kind": {
+        "lookup": {
+          "requests": 2,
+          "hits": 1
+        },
+        "rhetorical": {
+          "requests": 2,
+          "hits": 1
+        },
+        "assumptions": {
+          "requests": 2,
+          "hits": 1
+        }
+      },
+      "prefetch_applied": false
+    },
+    {
+      "name": "harness-paper_first_visit",
+      "requests": 54,
+      "hits": 7,
+      "misses": 47,
+      "cache_hit_rate": 0.12962962962962962,
+      "frontend_map_hit_rate": 0.09259259259259259,
+      "cost_with_cache_usd": 0.028115,
+      "cost_if_uncached_usd": 0.0325645,
+      "cost_saved_usd": 0.0044495,
+      "cost_saved_input_only_usd": 0.0004955,
+      "input_tokens": 7691,
+      "output_tokens_billed_at_word_cap": 8255,
+      "output_tokens_if_uncached_at_word_cap": 9573,
+      "by_kind": {
+        "lookup": {
+          "requests": 38,
+          "hits": 5
+        },
+        "rhetorical": {
+          "requests": 11,
+          "hits": 0
+        },
+        "assumptions": {
+          "requests": 5,
+          "hits": 2
+        }
+      },
+      "prefetch_applied": false
+    },
+    {
+      "name": "harness-paper_return_visit",
+      "requests": 54,
+      "hits": 54,
+      "misses": 0,
+      "cache_hit_rate": 1.0,
+      "frontend_map_hit_rate": 0.09259259259259259,
+      "cost_with_cache_usd": 0.0,
+      "cost_if_uncached_usd": 0.0325645,
+      "cost_saved_usd": 0.0325645,
+      "cost_saved_input_only_usd": 0.0038455,
+      "input_tokens": 7691,
+      "output_tokens_billed_at_word_cap": 0,
+      "output_tokens_if_uncached_at_word_cap": 9573,
+      "by_kind": {
+        "lookup": {
+          "requests": 38,
+          "hits": 38
+        },
+        "rhetorical": {
+          "requests": 11,
+          "hits": 11
+        },
+        "assumptions": {
+          "requests": 5,
+          "hits": 5
+        }
+      },
+      "prefetch_applied": true
+    },
+    {
+      "name": "fixture-paper_first_visit",
+      "requests": 311,
+      "hits": 20,
+      "misses": 291,
+      "cache_hit_rate": 0.06430868167202572,
+      "frontend_map_hit_rate": 0.01607717041800643,
+      "cost_with_cache_usd": 0.176314,
+      "cost_if_uncached_usd": 0.190895,
+      "cost_saved_usd": 0.014581,
+      "cost_saved_input_only_usd": 0.001867,
+      "input_tokens": 49210,
+      "output_tokens_billed_at_word_cap": 51192,
+      "output_tokens_if_uncached_at_word_cap": 55430,
+      "by_kind": {
+        "lookup": {
+          "requests": 209,
+          "hits": 5
+        },
+        "rhetorical": {
+          "requests": 68,
+          "hits": 1
+        },
+        "assumptions": {
+          "requests": 34,
+          "hits": 14
+        }
+      },
+      "prefetch_applied": false
+    },
+    {
+      "name": "fixture-paper_return_visit",
+      "requests": 311,
+      "hits": 311,
+      "misses": 0,
+      "cache_hit_rate": 1.0,
+      "frontend_map_hit_rate": 0.01607717041800643,
+      "cost_with_cache_usd": 0.0,
+      "cost_if_uncached_usd": 0.190895,
+      "cost_saved_usd": 0.190895,
+      "cost_saved_input_only_usd": 0.024605,
+      "input_tokens": 49210,
+      "output_tokens_billed_at_word_cap": 0,
+      "output_tokens_if_uncached_at_word_cap": 55430,
+      "by_kind": {
+        "lookup": {
+          "requests": 209,
+          "hits": 209
+        },
+        "rhetorical": {
+          "requests": 68,
+          "hits": 68
+        },
+        "assumptions": {
+          "requests": 34,
+          "hits": 34
+        }
+      },
+      "prefetch_applied": true
+    }
+  ],
+  "how_to_run": "python3 bench/cache_session.py",
+  "observations": [
+    "First-visit backend hit rate is low because fingerprints include surrounding context, so the same word in a new window is a miss.",
+    "Return-visit backend hit rate is 1.0 for the replayed request list.",
+    "Frontend Map hit rate stays low on return visits because PaperReader.jsx prefetches SHA-256 keys from the API while define/intent/challenge lookups still probe djb2 keys.",
+    "Output token counts are the prompt word caps tokenized from fixture prose, not live model completions. Live API confirmation failed."
+  ]
+}

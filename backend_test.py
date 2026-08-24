@@ -3,6 +3,60 @@ import sys
 import json
 from datetime import datetime
 
+# Fixtures shared with bench/cache_session.py (GS-T8). Keep payloads identical to
+# the original cache tests so the measurement extends this harness rather than
+# substituting a different lookup sequence.
+HARNESS_PAPER_TITLE = "Test Paper - AI Context Lookup"
+HARNESS_PAPER_CONTENT = (
+    "Artificial intelligence has revolutionized many fields. Machine learning algorithms "
+    "can process vast amounts of data to identify patterns and make predictions. Natural "
+    "language processing enables computers to understand and generate human language. Deep "
+    "learning networks use multiple layers to learn complex representations."
+)
+HARNESS_LOOKUP = {
+    "word": "algorithms",
+    "context": (
+        "Machine learning algorithms can process vast amounts of data to identify "
+        "patterns and make predictions"
+    ),
+}
+HARNESS_RHETORICAL = {
+    "word": "revolutionized",
+    "sentence": "Artificial intelligence has revolutionized many fields.",
+    "context": (
+        "Artificial intelligence has revolutionized many fields. Machine learning "
+        "algorithms can process vast amounts of data to identify patterns and make predictions."
+    ),
+}
+HARNESS_ASSUMPTIONS = {
+    "sentence": (
+        "Machine learning algorithms can process vast amounts of data to identify "
+        "patterns and make predictions."
+    ),
+    "context": (
+        "Artificial intelligence has revolutionized many fields. Machine learning "
+        "algorithms can process vast amounts of data to identify patterns and make "
+        "predictions. Natural language processing enables computers to understand and "
+        "generate human language."
+    ),
+}
+
+
+def harness_cache_request_sequence(paper_id):
+    """Miss-then-hit pairs from the original lookup / rhetorical / assumptions cache tests."""
+    lookup = {**HARNESS_LOOKUP, "paper_id": paper_id}
+    rhetorical = {**HARNESS_RHETORICAL, "paper_id": paper_id}
+    assumptions = {**HARNESS_ASSUMPTIONS, "paper_id": paper_id}
+    return [
+        ("lookup", lookup),
+        ("lookup", lookup),
+        ("rhetorical", rhetorical),
+        ("rhetorical", rhetorical),
+        ("assumptions", assumptions),
+        ("assumptions", assumptions),
+    ]
+
+
 class PaperReadingAPITester:
     def __init__(self, base_url="https://word-context-lookup.preview.emergentagent.com/api"):
         self.base_url = base_url
@@ -76,8 +130,8 @@ class PaperReadingAPITester:
     def test_create_paper_text(self):
         """Test creating paper with text content"""
         test_data = {
-            "title": "Test Paper - AI Context Lookup",
-            "content": "Artificial intelligence has revolutionized many fields. Machine learning algorithms can process vast amounts of data to identify patterns and make predictions. Natural language processing enables computers to understand and generate human language. Deep learning networks use multiple layers to learn complex representations."
+            "title": HARNESS_PAPER_TITLE,
+            "content": HARNESS_PAPER_CONTENT,
         }
         
         success, response = self.run_test(
@@ -135,11 +189,7 @@ class PaperReadingAPITester:
             print("❌ Skipped - No paper ID available")
             return False
             
-        lookup_data = {
-            "word": "algorithms",
-            "context": "Machine learning algorithms can process vast amounts of data to identify patterns and make predictions",
-            "paper_id": self.created_paper_id
-        }
+        lookup_data = {**HARNESS_LOOKUP, "paper_id": self.created_paper_id}
         
         success, response = self.run_test(
             "Word Lookup (AI Explanation)",
@@ -163,11 +213,7 @@ class PaperReadingAPITester:
             print("❌ Skipped - No paper ID available")
             return False
             
-        lookup_data = {
-            "word": "algorithms",
-            "context": "Machine learning algorithms can process vast amounts of data to identify patterns and make predictions",
-            "paper_id": self.created_paper_id
-        }
+        lookup_data = {**HARNESS_LOOKUP, "paper_id": self.created_paper_id}
         
         success, response = self.run_test(
             "Word Lookup (Cache Test)",
@@ -273,12 +319,7 @@ class PaperReadingAPITester:
             print("❌ Skipped - No paper ID available")
             return False
             
-        rhetorical_data = {
-            "word": "revolutionized",
-            "sentence": "Artificial intelligence has revolutionized many fields.",
-            "context": "Artificial intelligence has revolutionized many fields. Machine learning algorithms can process vast amounts of data to identify patterns and make predictions.",
-            "paper_id": self.created_paper_id
-        }
+        rhetorical_data = {**HARNESS_RHETORICAL, "paper_id": self.created_paper_id}
         
         success, response = self.run_test(
             "Rhetorical Intent Analysis",
@@ -302,12 +343,7 @@ class PaperReadingAPITester:
             print("❌ Skipped - No paper ID available")
             return False
             
-        rhetorical_data = {
-            "word": "revolutionized",
-            "sentence": "Artificial intelligence has revolutionized many fields.",
-            "context": "Artificial intelligence has revolutionized many fields. Machine learning algorithms can process vast amounts of data to identify patterns and make predictions.",
-            "paper_id": self.created_paper_id
-        }
+        rhetorical_data = {**HARNESS_RHETORICAL, "paper_id": self.created_paper_id}
         
         success, response = self.run_test(
             "Rhetorical Intent (Cache Test)",
@@ -333,11 +369,7 @@ class PaperReadingAPITester:
             print("❌ Skipped - No paper ID available")
             return False
             
-        assumptions_data = {
-            "sentence": "Machine learning algorithms can process vast amounts of data to identify patterns and make predictions.",
-            "context": "Artificial intelligence has revolutionized many fields. Machine learning algorithms can process vast amounts of data to identify patterns and make predictions. Natural language processing enables computers to understand and generate human language.",
-            "paper_id": self.created_paper_id
-        }
+        assumptions_data = {**HARNESS_ASSUMPTIONS, "paper_id": self.created_paper_id}
         
         success, response = self.run_test(
             "Assumptions Stress-Test Analysis",
@@ -361,11 +393,7 @@ class PaperReadingAPITester:
             print("❌ Skipped - No paper ID available")
             return False
             
-        assumptions_data = {
-            "sentence": "Machine learning algorithms can process vast amounts of data to identify patterns and make predictions.",
-            "context": "Artificial intelligence has revolutionized many fields. Machine learning algorithms can process vast amounts of data to identify patterns and make predictions. Natural language processing enables computers to understand and generate human language.",
-            "paper_id": self.created_paper_id
-        }
+        assumptions_data = {**HARNESS_ASSUMPTIONS, "paper_id": self.created_paper_id}
         
         success, response = self.run_test(
             "Assumptions Analysis (Cache Test)",
