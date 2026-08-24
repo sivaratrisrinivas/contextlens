@@ -92,6 +92,23 @@ Every response is **pre-cached** per (word + context fingerprint). The same look
 
 ---
 
+## Results
+
+GS-T8 cache measurement, 2026-08-24. Model: `gemini-3-flash-preview`. Hardware: Intel Xeon Processor, 4 cores, 15.64 GiB RAM, Linux 6.12.94+. Dataset: 2 papers, 5 sessions, 736 requests. Run from a clean checkout with `python3 bench/cache_session.py`.
+
+| Metric | Value |
+|--------|-------|
+| Cache hit rate (all requests) | 53.67% |
+| Cache hit rate (first visit) | 7.40% |
+| Cache hit rate (return visit) | 100% |
+| Cost saved per session | $0.04888810 |
+| Cost saved per first visit | $0.00951525 |
+| Cost saved per return visit | $0.11172975 |
+
+Cost uses published Gemini 3 Flash Preview standard paid prices ($0.50 input and $3.00 output per 1M tokens). Output size is the prompt word cap tokenized from fixture prose, not a live model completion. The preview host used by `backend_test.py` returned HTTP 403, so this run is an in-process replay of `backend/server.py` fingerprints. Full JSON: `bench/results/gs_t8_cache.json`.
+
+---
+
 ## Local Setup
 
 ### Prerequisites
