@@ -1,0 +1,348 @@
+{
+  "gate": "GS-T8",
+  "status": "ok",
+  "date": "2026-08-24",
+  "measured_at": "2026-08-24T20:41:57.704800+00:00",
+  "model": "gemini-3-flash-preview",
+  "llm_mode": "stubbed",
+  "pricing": {
+    "source": "https://ai.google.dev/gemini-api/docs/pricing",
+    "as_of": "2026-08-24",
+    "input_usd_per_million": 0.5,
+    "output_usd_per_million": 3.0,
+    "tokenizer": "tiktoken cl100k_base",
+    "tokenizer_note": "Gemini tokenizer is not in this checkout. Token counts are an approximation."
+  },
+  "dataset": {
+    "name": "gs_t8_session_v1",
+    "path": "bench/gs_t8_session.json",
+    "papers": 1,
+    "word_tokens": 87,
+    "clean_word_tokens": 87,
+    "scripted_lookups": 38,
+    "sessions": 2,
+    "notes": "Scripted reader clicks, not production traces. first_read includes two same-token re-clicks. return_read repeats the unique lookups only. Clicks were not chosen to raise hit rate."
+  },
+  "hardware": {
+    "platform": "Linux-6.12.94+-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "cpu": "Intel(R) Xeon(R) Processor",
+    "cpu_count": 4,
+    "machine": "x86_64"
+  },
+  "sessions": [
+    {
+      "id": "first_read",
+      "lookups": 20,
+      "hits": 2,
+      "misses": 18,
+      "hit_rate": 0.1,
+      "llm_usd": 0.0029700000000000004,
+      "cost_saved_usd": 0.00030450000000000003,
+      "input_tokens": 2808,
+      "output_tokens": 522,
+      "failure_count": 0
+    },
+    {
+      "id": "return_read",
+      "lookups": 18,
+      "hits": 18,
+      "misses": 0,
+      "hit_rate": 1.0,
+      "llm_usd": 0.0,
+      "cost_saved_usd": 0.0029700000000000004,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "failure_count": 0
+    }
+  ],
+  "summary": {
+    "cache_hit_rate": 0.5263157894736842,
+    "cost_saved_per_session_usd": 0.0016372500000000003,
+    "lookups": 38,
+    "hits": 20,
+    "misses": 18,
+    "llm_calls": 18,
+    "total_llm_usd": 0.0029700000000000004,
+    "total_cost_saved_usd": 0.0032745000000000005
+  },
+  "frontend_prefetch": {
+    "keys_checked": 87,
+    "sha256_djb2_matches": 0,
+    "match_rate": 0.0
+  },
+  "failures": [
+    {
+      "id": "frontend_prefetch_fingerprint_mismatch",
+      "detail": "0/87 frontend djb2 keys matched backend SHA-256 fingerprints. Batch GET paper-cache cannot populate the click Map for returning readers. Repeat POSTs still hit the backend cache, so LLM cost is still avoided."
+    }
+  ],
+  "click_log": [
+    {
+      "session": "first_read",
+      "kind": "define",
+      "word": "quantification",
+      "cached_flag": false,
+      "classified": "miss"
+    },
+    {
+      "session": "first_read",
+      "kind": "define",
+      "word": "entropy",
+      "cached_flag": false,
+      "classified": "miss"
+    },
+    {
+      "session": "first_read",
+      "kind": "define",
+      "word": "uncertainty",
+      "cached_flag": false,
+      "classified": "miss"
+    },
+    {
+      "session": "first_read",
+      "kind": "define",
+      "word": "capacity",
+      "cached_flag": false,
+      "classified": "miss"
+    },
+    {
+      "session": "first_read",
+      "kind": "define",
+      "word": "vanishing",
+      "cached_flag": false,
+      "classified": "miss"
+    },
+    {
+      "session": "first_read",
+      "kind": "define",
+      "word": "molecular",
+      "cached_flag": false,
+      "classified": "miss"
+    },
+    {
+      "session": "first_read",
+      "kind": "define",
+      "word": "encoding",
+      "cached_flag": false,
+      "classified": "miss"
+    },
+    {
+      "session": "first_read",
+      "kind": "define",
+      "word": "nucleotide",
+      "cached_flag": false,
+      "classified": "miss"
+    },
+    {
+      "session": "first_read",
+      "kind": "define",
+      "word": "ergodic",
+      "cached_flag": false,
+      "classified": "miss"
+    },
+    {
+      "session": "first_read",
+      "kind": "define",
+      "word": "mixing",
+      "cached_flag": false,
+      "classified": "miss"
+    },
+    {
+      "session": "first_read",
+      "kind": "define",
+      "word": "decoder",
+      "cached_flag": false,
+      "classified": "miss"
+    },
+    {
+      "session": "first_read",
+      "kind": "define",
+      "word": "stationary",
+      "cached_flag": false,
+      "classified": "miss"
+    },
+    {
+      "session": "first_read",
+      "kind": "intent",
+      "word": "entropy",
+      "cached_flag": false,
+      "classified": "miss"
+    },
+    {
+      "session": "first_read",
+      "kind": "intent",
+      "word": "capacity",
+      "cached_flag": false,
+      "classified": "miss"
+    },
+    {
+      "session": "first_read",
+      "kind": "intent",
+      "word": "vanishing",
+      "cached_flag": false,
+      "classified": "miss"
+    },
+    {
+      "session": "first_read",
+      "kind": "intent",
+      "word": "ergodic",
+      "cached_flag": false,
+      "classified": "miss"
+    },
+    {
+      "session": "first_read",
+      "kind": "challenge",
+      "word": "capacity",
+      "cached_flag": false,
+      "classified": "miss"
+    },
+    {
+      "session": "first_read",
+      "kind": "challenge",
+      "word": "ergodic",
+      "cached_flag": false,
+      "classified": "miss"
+    },
+    {
+      "session": "first_read",
+      "kind": "define",
+      "word": "entropy",
+      "cached_flag": true,
+      "classified": "hit"
+    },
+    {
+      "session": "first_read",
+      "kind": "define",
+      "word": "decoder",
+      "cached_flag": true,
+      "classified": "hit"
+    },
+    {
+      "session": "return_read",
+      "kind": "define",
+      "word": "quantification",
+      "cached_flag": true,
+      "classified": "hit"
+    },
+    {
+      "session": "return_read",
+      "kind": "define",
+      "word": "entropy",
+      "cached_flag": true,
+      "classified": "hit"
+    },
+    {
+      "session": "return_read",
+      "kind": "define",
+      "word": "uncertainty",
+      "cached_flag": true,
+      "classified": "hit"
+    },
+    {
+      "session": "return_read",
+      "kind": "define",
+      "word": "capacity",
+      "cached_flag": true,
+      "classified": "hit"
+    },
+    {
+      "session": "return_read",
+      "kind": "define",
+      "word": "vanishing",
+      "cached_flag": true,
+      "classified": "hit"
+    },
+    {
+      "session": "return_read",
+      "kind": "define",
+      "word": "molecular",
+      "cached_flag": true,
+      "classified": "hit"
+    },
+    {
+      "session": "return_read",
+      "kind": "define",
+      "word": "encoding",
+      "cached_flag": true,
+      "classified": "hit"
+    },
+    {
+      "session": "return_read",
+      "kind": "define",
+      "word": "nucleotide",
+      "cached_flag": true,
+      "classified": "hit"
+    },
+    {
+      "session": "return_read",
+      "kind": "define",
+      "word": "ergodic",
+      "cached_flag": true,
+      "classified": "hit"
+    },
+    {
+      "session": "return_read",
+      "kind": "define",
+      "word": "mixing",
+      "cached_flag": true,
+      "classified": "hit"
+    },
+    {
+      "session": "return_read",
+      "kind": "define",
+      "word": "decoder",
+      "cached_flag": true,
+      "classified": "hit"
+    },
+    {
+      "session": "return_read",
+      "kind": "define",
+      "word": "stationary",
+      "cached_flag": true,
+      "classified": "hit"
+    },
+    {
+      "session": "return_read",
+      "kind": "intent",
+      "word": "entropy",
+      "cached_flag": true,
+      "classified": "hit"
+    },
+    {
+      "session": "return_read",
+      "kind": "intent",
+      "word": "capacity",
+      "cached_flag": true,
+      "classified": "hit"
+    },
+    {
+      "session": "return_read",
+      "kind": "intent",
+      "word": "vanishing",
+      "cached_flag": true,
+      "classified": "hit"
+    },
+    {
+      "session": "return_read",
+      "kind": "intent",
+      "word": "ergodic",
+      "cached_flag": true,
+      "classified": "hit"
+    },
+    {
+      "session": "return_read",
+      "kind": "challenge",
+      "word": "capacity",
+      "cached_flag": true,
+      "classified": "hit"
+    },
+    {
+      "session": "return_read",
+      "kind": "challenge",
+      "word": "ergodic",
+      "cached_flag": true,
+      "classified": "hit"
+    }
+  ]
+}

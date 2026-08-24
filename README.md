@@ -92,6 +92,30 @@ Every response is **pre-cached** per (word + context fingerprint). The same look
 
 ---
 
+## Results
+
+GS-T8 cache measurement, 2026-08-24. Model `gemini-3-flash-preview` (stubbed completions, real prompts). Dataset: 1 fixture paper, 87 word tokens, 38 scripted lookups across 2 sessions. Hardware: Intel Xeon, 4 CPUs, Linux x86_64, Python 3.12.3.
+
+| Session | Lookups | Hits | Misses | Hit rate | LLM USD | Cost saved USD |
+| --- | --- | --- | --- | --- | --- | --- |
+| first_read | 20 | 2 | 18 | 0.1000 | 0.00297000 | 0.00030450 |
+| return_read | 18 | 18 | 0 | 1.0000 | 0.00000000 | 0.00297000 |
+| all lookups | 38 | 20 | 18 | 0.5263 | 0.00297000 | 0.00327450 |
+
+Cache hit rate over the scripted lookups is 0.5263 (20/38). Mean cost saved per session is $0.00163725, using Gemini 3 Flash Preview list prices of $0.50 / 1M input tokens and $3.00 / 1M output tokens, with tiktoken cl100k_base as a stand-in tokenizer.
+
+Failure recorded: 0/87 frontend djb2 fingerprints matched backend SHA-256 keys, so batch paper-cache prefetch cannot fill the click Map. Repeat POSTs still hit the backend cache.
+
+These are estimated LLM dollars, not a provider invoice. The click list is a fixture, not production traffic.
+
+Run from the repo root:
+
+```bash
+python bench/gs_t8_cache_hit_cost.py
+```
+
+Writes `bench/gs_t8_cache_hit_cost_results.json` and prints the table above.
+
 ## Local Setup
 
 ### Prerequisites

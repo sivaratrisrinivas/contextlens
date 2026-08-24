@@ -1,0 +1,56 @@
+{
+  "name": "gs_t8_session_v1",
+  "title": "GS-T8 fixture: noisy channel notes",
+  "content": "Information theory studies the quantification, storage, and communication of information. Shannon entropy measures the average uncertainty in a random variable. Channel capacity is the highest rate at which information can be sent over a noisy channel with vanishing error probability.\n\nIn molecular communication, DNA-based encoding uses nucleotide sequences as the physical medium that carries messages through a fluid channel. Ergodic mixing in that channel is often assumed so that time averages equal ensemble averages. The decoder then treats successive observations as independent draws from a stationary distribution.",
+  "notes": "Scripted reader clicks, not production traces. first_read includes two same-token re-clicks. return_read repeats the unique lookups only. Clicks were not chosen to raise hit rate.",
+  "sessions": [
+    {
+      "id": "first_read",
+      "clicks": [
+        {"kind": "define", "word": "quantification", "occurrence": 0},
+        {"kind": "define", "word": "entropy", "occurrence": 0},
+        {"kind": "define", "word": "uncertainty", "occurrence": 0},
+        {"kind": "define", "word": "capacity", "occurrence": 0},
+        {"kind": "define", "word": "vanishing", "occurrence": 0},
+        {"kind": "define", "word": "molecular", "occurrence": 0},
+        {"kind": "define", "word": "encoding", "occurrence": 0},
+        {"kind": "define", "word": "nucleotide", "occurrence": 0},
+        {"kind": "define", "word": "ergodic", "occurrence": 0},
+        {"kind": "define", "word": "mixing", "occurrence": 0},
+        {"kind": "define", "word": "decoder", "occurrence": 0},
+        {"kind": "define", "word": "stationary", "occurrence": 0},
+        {"kind": "intent", "word": "entropy", "occurrence": 0},
+        {"kind": "intent", "word": "capacity", "occurrence": 0},
+        {"kind": "intent", "word": "vanishing", "occurrence": 0},
+        {"kind": "intent", "word": "ergodic", "occurrence": 0},
+        {"kind": "challenge", "word": "capacity", "occurrence": 0},
+        {"kind": "challenge", "word": "ergodic", "occurrence": 0},
+        {"kind": "define", "word": "entropy", "occurrence": 0},
+        {"kind": "define", "word": "decoder", "occurrence": 0}
+      ]
+    },
+    {
+      "id": "return_read",
+      "clicks": [
+        {"kind": "define", "word": "quantification", "occurrence": 0},
+        {"kind": "define", "word": "entropy", "occurrence": 0},
+        {"kind": "define", "word": "uncertainty", "occurrence": 0},
+        {"kind": "define", "word": "capacity", "occurrence": 0},
+        {"kind": "define", "word": "vanishing", "occurrence": 0},
+        {"kind": "define", "word": "molecular", "occurrence": 0},
+        {"kind": "define", "word": "encoding", "occurrence": 0},
+        {"kind": "define", "word": "nucleotide", "occurrence": 0},
+        {"kind": "define", "word": "ergodic", "occurrence": 0},
+        {"kind": "define", "word": "mixing", "occurrence": 0},
+        {"kind": "define", "word": "decoder", "occurrence": 0},
+        {"kind": "define", "word": "stationary", "occurrence": 0},
+        {"kind": "intent", "word": "entropy", "occurrence": 0},
+        {"kind": "intent", "word": "capacity", "occurrence": 0},
+        {"kind": "intent", "word": "vanishing", "occurrence": 0},
+        {"kind": "intent", "word": "ergodic", "occurrence": 0},
+        {"kind": "challenge", "word": "capacity", "occurrence": 0},
+        {"kind": "challenge", "word": "ergodic", "occurrence": 0}
+      ]
+    }
+  ]
+}
